@@ -23,17 +23,39 @@
         >
           GitHub
         </a>
+        <a
+          class="button--grey"
+          @click="sendEve"
+        >
+          sendEv
+        </a>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import io from 'socket.io-client'
 import Logo from '~/components/Logo.vue'
 
 export default {
   components: {
     Logo
+  },
+  data () {
+    return {
+      socket: io()
+    }
+  },
+  mounted () {
+    this.socket.on('news', (data) => {
+      console.log(data)
+    })
+  },
+  methods: {
+    sendEve () {
+      this.socket.emit('ev', 'hogehoge')
+    }
   }
 }
 </script>
