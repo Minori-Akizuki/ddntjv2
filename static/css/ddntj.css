@@ -1,0 +1,19 @@
+body{
+  font-family: "Trebuchet MS", sans-serif;
+  margin: 0px;
+}
+
+.dropArea {
+  padding: 0;
+  margin: 0;
+}
+
+.dropArea .draggable {
+  list-style: none;
+  margin: 0px;
+  padding: 0;
+}
+
+[v-cloak] {
+  display:none;
+}

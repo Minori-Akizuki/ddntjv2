@@ -13,6 +13,10 @@ module.exports = {
     ],
     link: [
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+    ],
+    script: [
+      { src: 'https://code.jquery.com/jquery-3.2.1.min.js', body: true },
+      { src: 'https://code.jquery.com/ui/1.12.1/jquery-ui.min.js', body: true }
     ]
   },
   /*
@@ -23,6 +27,10 @@ module.exports = {
   ** Global CSS
   */
   css: [
+    '@/static/css/ddntj.css',
+    '@/static/css/jquery-ui.css',
+    '@/static/css/jquery-ui.structure.css',
+    '@/static/css/jquery-ui.theme.css'
   ],
   /*
   ** Plugins to load before mounting the App
