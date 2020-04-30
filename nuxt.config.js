@@ -27,10 +27,7 @@ module.exports = {
   ** Global CSS
   */
   css: [
-    '@/static/css/ddntj.css',
-    '@/static/css/jquery-ui.css',
-    '@/static/css/jquery-ui.structure.css',
-    '@/static/css/jquery-ui.theme.css'
+    '@/static/css/ddntj.css'
   ],
   /*
   ** Plugins to load before mounting the App

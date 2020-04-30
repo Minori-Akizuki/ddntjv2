@@ -1,58 +1,58 @@
 <template>
-  <div id="chatbox" class="draggable resizable ui-widget-content">
+  <div id="chatbox" class="resizable">
     <div id="chatmessages" @scroll="manageUpdateFlag()">
-      <div class="spacer" />
-      <div
+      <pre
         v-for="message in messages"
         v-cloak
         :key="message.id"
-        v-bind:style="{color:message.color}"
+        v-bind:style="{color:message.color, height:messageHeight(message.text)}"
         class="message"
       >
-        {{ message.text }}
-      </div>
-      <div class="input-settings">
-        <b-container fluid>
-          <!-- 名前 -->
-          <b-row>
-            <b-col sm="3">
-              <input
-                v-model="name"
-              >
-            </b-col>
-            <!-- システム選択 -->
-            <b-col sm="5">
-              <select v-model="selectedSystem" name="systems" size="1">
-                <option selected />
-                <option v-for="system in systems" :key="system.system" :value="system.system">{{system.name}}</option>
-              </select>
-            </b-col>
-            <b-col sm="1">
-              <b-form-input
-                id="textcolor"
-                v-model="inputColor"
-                type="color"
-              />
-            </b-col>
-          </b-row>
-        </b-container>
-      </div>
-      <div class="input-area">
-        <textarea
-          v-model="inputbox"
-          placeholder="input message here"
-          class="input-box"
-          @keydown.enter="sendMessage"
-        />
-        <b-button
-          id="button"
-          v-model="inputColor"
-          class="enter-button"
-          @click="sendMessage"
-        >
-          send Message
-        </b-button>
-      </div>
+{{ message.text }}
+      </pre>
+    </div>
+    <div class="input-settings">
+      <b-container fluid>
+        <!-- 名前 -->
+        <b-row>
+          <b-col sm="5">
+            <b-form-input
+              size="sm"
+              v-model="name"
+            />
+          </b-col>
+          <!-- システム選択 -->
+          <b-col sm="5">
+            <select v-model="selectedSystem" name="systems">
+              <option selected />
+              <option v-for="system in systems" :key="system.system" :value="system.system">{{system.name}}</option>
+            </select>
+          </b-col>
+          <b-col sm="2">
+            <b-form-input
+              id="textcolor"
+              v-model="inputColor"
+              type="color"
+            />
+          </b-col>
+        </b-row>
+      </b-container>
+    </div>
+    <div class="input-area">
+      <b-form-textarea
+        v-model="inputbox"
+        size="sm"
+        placeholder="input message here"
+        class="input-box"
+        @keydown.enter="sendMessage"
+      />
+      <b-button
+        id="button"
+        v-model="inputColor"
+        @click="sendMessage"
+      >
+        送信
+      </b-button>
     </div>
   </div>
 </template>
@@ -66,7 +66,10 @@ export default {
     return {
       messages: [
         { id: 1, color: '#FF0000', text: 'testRed' },
-        { id: 2, color: '#00FF00', text: 'testgreen' }
+        { id: 2, color: '#00FF00', text: 'testgreen\nmultiline' },
+        { id: 3, color: '#00FF00', text: 'testgreen' },
+        { id: 4, color: '#00FF00', text: 'testgreen' },
+        { id: 5, color: '#00FF00', text: 'testgreen' }
       ],
       selectedSystem: '',
       systems: [
@@ -90,6 +93,9 @@ export default {
     },
     manageUpdateFlag () {
       console.log('manageUpdateFlag')
+    },
+    messageHeight (msg) {
+      return (msg.split('\n').length) + 'em'
     }
   }
 }
@@ -98,27 +104,32 @@ export default {
 <style>
 #chatbox{
   border: solid #808080;
-  bottom: 5px;
+  background-color: lightblue;
+  bottom: 0px;
   display: flex;
   flex-direction: column;
-  height: 200px;
-  left: 10px;
+  left: 0px;
   padding: 0.5em;
   position: absolute;
-  width: 800px;
+  width: 100vw;
   z-index: 3;
 }
 
 #chatmessages{
   background: #fff;
-  display: flex;
-  flex: 1 0 0px;
-  flex-direction: column;
-  font-size: 12px;
+  height: 5em;
   margin: 0 0 5px;
   overflow-y: scroll;
   position: relative;
   white-space: pre-line;
+}
+
+.message {
+  flex: 0 0 auto;
+  font-size: 12px;
+  padding: 0;
+  margin: 0;
+  line-height: 1;
 }
 
 .input-area {
@@ -131,25 +142,13 @@ export default {
   align-items: flex-start;
   display: flex;
   flex: 1 0 0px;
-  height: 50px;
+  height: 3em;
   padding: 0;
   resize: none
-}
-
-.enter-button {
-  flex: 0 0 auto;
 }
 
 .input-settings {
   flex: 0 0 auto;
   margin-bottom: 5px;
-}
-
-.message {
-  flex: 0 0 auto;
-}
-
-.spacer {
-  flex: 1 0 0px;
 }
 </style>
