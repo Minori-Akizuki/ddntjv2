@@ -102,7 +102,7 @@ export default {
         return
       }
       const text = `${this.name} : ${this.inputbox.trimEnd()}`
-      const message = { id: new Date(), color: this.inputColor, text }
+      const message = { id: Date.now(), color: this.inputColor, text }
       this.addMessage(message)
     },
     manageAutoScrollFlag () {

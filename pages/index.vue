@@ -46,17 +46,19 @@ export default {
   },
   data () {
     return {
-      socket: io(),
+      socket: null,
       selectedRoom: null,
       rooms: [
         { value: 1, text: 'room1' }
       ]
     }
   },
+  created () {
+  },
   mounted () {
-    this.socket.on('news', (data) => {
-      console.log(data)
-    })
+    const socket = io()
+    this.$store.commit('setSocket', { socket, name: 'main' })
+    this.socket = this.$store.getters.socket('main')
   },
   methods: {
     sendEve () {

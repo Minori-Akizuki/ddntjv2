@@ -20,27 +20,32 @@
         </b-navbar-nav>
       </b-collapse>
     </b-navbar>
+    <trpgmap />
     <chatbox />
   </div>
 </template>
 
 <script>
-import io from 'socket.io-client'
 import chatbox from '~/components/chatbox.vue'
+import trpgmap from '~/components/map.vue'
 
 export default {
+  validate ({ params }) {
+    return /^\d+$/.test(params.id)
+  },
   components: {
-    chatbox
+    chatbox,
+    trpgmap
   },
   data () {
     return {
-      socket: io()
+      socket: {},
+      roomNo: null
     }
   },
   mounted () {
-    this.socket.on('news', (data) => {
-      console.log(data)
-    })
+    this.roomNo = this.$route.params.id
+    this.socket = this.$store.getters.socket('main')
   },
   methods: {
     sendEve () {
