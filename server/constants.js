@@ -1,0 +1,32 @@
+exports.constants = () => {
+  const _constatnts = {
+    DB_HOST: 'localhost',
+    DB_PORT: '5984',
+    DB_USERPASS: 'admin:admin',
+    DB_PREFIX: 'ddntj_test',
+    ROOM_TOTAL: 3,
+    INITDATA: {
+      master: {
+        mages: []
+      },
+      room: {
+        isCreated: false,
+        roomName: '',
+        password: '',
+        system: '',
+        chatLog: [],
+        chits: [],
+        status: 'HP MP *毒',
+        map: {
+          height: 10,
+          width: 10,
+          type: 'color',
+          color: '#888888',
+          image: { bin: '' },
+          snapping: false
+        }
+      }
+    }
+  }
+  return _constatnts
+}

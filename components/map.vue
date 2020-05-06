@@ -58,9 +58,6 @@ export default {
   methods: {
     chitImage (c) {
       return ''
-    },
-    eHandler (e) {
-      console.log(e)
     }
   }
 }

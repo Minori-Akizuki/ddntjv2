@@ -16,15 +16,11 @@
         >
           GitHub
         </a>
-        <a
-          class="button--grey"
-          @click="sendEve"
-        >
-          sendEv
-        </a>
       </div>
       <div>
-        <nuxt-link to="room/1">入室</nuxt-link>
+        <nuxt-link to="room/1">
+          入室
+        </nuxt-link>
         <b-form-select
           v-model="selectedRoom"
           :options="rooms"
@@ -61,9 +57,6 @@ export default {
     this.socket = this.$store.getters.socket('main')
   },
   methods: {
-    sendEve () {
-      this.socket.emit('ev', 'hogehoge')
-    }
   }
 }
 </script>

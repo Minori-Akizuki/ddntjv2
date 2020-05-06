@@ -8,8 +8,12 @@ export const state = () => ({
   map: {
     width: 10,
     height: 10,
-    img: ''
-  }
+    type: 'color',
+    color: '#880000',
+    img: '0',
+    snap: false
+  },
+  images: []
 })
 
 export const mutations = {
@@ -27,5 +31,11 @@ export const getters = {
   },
   chits (state) {
     return state.chits
+  },
+  images (state) {
+    return state.images
+  },
+  imageById: state => (id) => {
+    return state.images[state.images.findIndex(i => i.id === id)]
   }
 }
