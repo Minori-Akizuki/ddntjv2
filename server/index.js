@@ -270,7 +270,6 @@ async function start () {
       consola.info('success create room')
     })
     socket.on('roomData', (roomNo) => {
-      consola.info('req room data')
       const room = moldRoomData(rooms[roomNo])
       io.to(id).emit('roomData', room)
     })

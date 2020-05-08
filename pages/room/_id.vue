@@ -53,9 +53,10 @@ export default {
   mounted () {
     const _this = this
     this.roomNo = this.$route.params.id
-    this.socket = io()
+    const socket = io()
+    this.$store.commit('setSocket', { socket, name: 'room' })
+    this.socket = this.$store.getters.socket('room')
     this.socket.on('roomData', (data) => {
-      console.log('recieve room data')
       _this.setRoomData(data)
     })
     this.socket.emit('roomData', this.roomNo)
