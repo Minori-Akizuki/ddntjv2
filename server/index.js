@@ -136,22 +136,22 @@ initDb()
 
 /**
  * 部屋情報をクライアントが扱いやすい形に成型する
- * @param {部屋情報} roomRaw 
+ * @param {部屋情報} roomRaw
  */
 function moldRoomData (roomRaw) {
   const room = {}
   room.member = roomRaw.member
-  room.isCreated = roomRaw.isCreated.value
-  room.roomNo = roomRaw.roomNo.value
-  room.roomName = roomRaw.roomName.value
-  room.password = roomRaw.password.value
-  room.system = roomRaw.system.value
-  room.chatLog = roomRaw.chatLog.value
-  room.chits = roomRaw.chits.value
-  room.map = roomRaw.map // こいつだけ _id, _rev が残ってるけどまあいいか
+  room.isCreated = roomRaw.roomData.isCreated.value
+  room.roomNo = roomRaw.roomData.roomNo.value
+  room.roomName = roomRaw.roomData.roomName.value
+  room.password = roomRaw.roomData.password.value
+  room.system = roomRaw.roomData.system.value
+  room.chatLog = roomRaw.roomData.chatLog.value
+  room.chits = roomRaw.roomData.chits.value
+  room.map = roomRaw.roomData.map // こいつだけ _id, _rev が残ってるけどまあいいか
 
   return room
-} 
+}
 
 async function start () {
   // Init Nuxt.js
@@ -270,8 +270,9 @@ async function start () {
       consola.info('success create room')
     })
     socket.on('roomData', (roomNo) => {
+      consola.info('req room data')
       const room = moldRoomData(rooms[roomNo])
-      socket.to(id).emit('roomData', room)
+      io.to(id).emit('roomData', room)
     })
   })
 }

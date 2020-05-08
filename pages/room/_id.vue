@@ -26,6 +26,7 @@
 </template>
 
 <script>
+import io from 'socket.io-client'
 import chatbox from '~/components/chatbox.vue'
 import trpgmap from '~/components/map.vue'
 
@@ -52,10 +53,12 @@ export default {
   mounted () {
     const _this = this
     this.roomNo = this.$route.params.id
-    this.socket = this.$store.getters.socket('main')
+    this.socket = io()
     this.socket.on('roomData', (data) => {
+      console.log('recieve room data')
       _this.setRoomData(data)
     })
+    this.socket.emit('roomData', this.roomNo)
   },
   methods: {
     setRoomData (data) {
