@@ -97,7 +97,6 @@
 </template>
 
 <script>
-import io from 'socket.io-client'
 import Logo from '~/components/Logo.vue'
 
 const sha = require('js-sha256')
@@ -152,18 +151,11 @@ export default {
   },
   mounted () {
     const _this = this
-    const socket = io()
-    this.$store.commit('setSocket', { socket, name: 'main' })
     this.socket = this.$store.getters.socket('main')
     this.socket.on('roomsinfo', (data) => {
       _this.rooms = data
     })
-    this.socket.on('systems', (systems) => {
-      console.log('recieve systems', systems)
-      this.$store.commit('setSystems', { systems: systems.names })
-    })
     this.socket.emit('roomsinfo')
-    this.socket.emit('systems')
     this.socket.on('createRoom.success', () => {
       console.log('roomCreated')
       _this.$router.push(`/room/${_this.selectedRoom}?password=${_this.newRoomPassword}`)

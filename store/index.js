@@ -1,3 +1,4 @@
+import Vue from 'vue'
 export const strict = false
 export const state = () => ({
   sockets: {},
@@ -19,7 +20,7 @@ export const state = () => ({
 
 export const mutations = {
   setSocket (state, { socket, name }) {
-    state.sockets[name] = socket
+    Vue.set(state.sockets, name, socket)
   },
   setSystems (state, { systems }) {
     state.systems.splice(0)
