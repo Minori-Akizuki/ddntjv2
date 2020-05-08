@@ -32,10 +32,10 @@
             </b-col>
             <!-- システム選択 -->
             <b-col sm="5">
-              <select v-model="selectedSystem" name="systems">
-                <option selected />
-                <option v-for="system in systems" :key="system.system" :value="system.system">{{system.name}}</option>
-              </select>
+              <b-form-select
+                v-model="selectedSystem"
+                :options="systems"
+              />
             </b-col>
             <b-col sm="2">
               <b-form-input
@@ -75,13 +75,15 @@ export default {
     return {
       messages: [],
       selectedSystem: '',
-      systems: [
-        { system: 'system', name: 'systemname' }
-      ],
       name: 'name',
       inputbox: '',
       inputColor: '#000000',
       autoScroll: true
+    }
+  },
+  computed: {
+    systems () {
+      return this.$store.getters.systemsToSelection
     }
   },
   mounted () {
