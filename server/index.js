@@ -27,7 +27,6 @@ process.env.CONSOLA_LEVEL = 6
 // 自作ライブラリはnuxtのあとに入れる必要がある。
 // import dicebot
 const dicebot = require('./dicebot').dicebot()
-const systems = []
 
 // import constants
 // 変更される可能性があるオブジェクトはこちらで参照する
@@ -40,6 +39,7 @@ const dbUrl = 'http://' + constants.DB_USERPASS + '@' + constants.DB_HOST + ':' 
 const nano = _nano(dbUrl)
 let dbMaster
 const rooms = []
+let images = {}
 
 // init db
 function initDb () {
@@ -60,7 +60,7 @@ function initDb () {
         roomDb = await nano.db.use(roomDbName)
         const initdata = constantsF().INITDATA
         // TODO : 配列にぶちこんで全部並列に実行する
-        await roomDb.insert({ isCreated: initdata.room.isCreated }, IDs.isCreated)
+        await roomDb.insert({ value: initdata.room.isCreated }, IDs.isCreated)
         await roomDb.insert({ value: i }, IDs.roomNo)
         await roomDb.insert({ value: initdata.room.roomName }, IDs.roomName)
         await roomDb.insert({ value: initdata.room.password }, IDs.password)
@@ -113,10 +113,7 @@ function initDb () {
       // master DB
       await nano.db.create(constants.DB_PREFIX)
       dbMaster = nano.db.use(constants.DB_PREFIX)
-      dbMaster.insert({
-        images: constantsF().INITDATA.master.images
-      }, IDs.images)
-
+      dbMaster.insert({ value: [] }, IDs.images)
       // rooms
       setRoom(rooms, true)
     } else {
@@ -127,6 +124,7 @@ function initDb () {
       })
       consola.info(data)
       dbMaster = nano.db.use(constants.DB_PREFIX)
+      images = await dbMaster.get(IDs.images)
       setRoom(rooms, false)
     }
   })
@@ -276,6 +274,21 @@ async function start () {
     socket.on('roomData', (roomNo) => {
       const room = moldRoomData(rooms[roomNo])
       io.to(id).emit('roomData', room)
+    })
+    socket.on('images', () => {
+      io.to(id).emit('images', images.value)
+    })
+    socket.on('images.add', async (img) => {
+      images.value.push(img)
+      await dbMaster.insert(images, IDs.images)
+      images = await dbMaster.get(IDs.images)
+      io.emit('images.add', img)
+    })
+    socket.on('images.delete', async (id) => {
+      images.value.splice(images.value.findIndex(i => i.id === id), 1)
+      await dbMaster.insert(images, IDs.images)
+      images = await dbMaster.get(IDs.images)
+      io.emit('images.delete', id)
     })
   })
 }

@@ -4,8 +4,8 @@ export const state = () => ({
   sockets: {},
   systems: [],
   chits: [
-    { id: 1, img: null, name: 'testChit', initiative: 0, status: {}, memo: 'hogehoge' },
-    { id: 2, img: null, name: 'testChit2', initiative: 0, status: {}, memo: 'hugahuga' }
+    { id: 1, bin: null, name: 'testChit', initiative: 0, status: {}, memo: 'hogehoge' },
+    { id: 2, bin: null, name: 'testChit2', initiative: 0, status: {}, memo: 'hugahuga' }
   ],
   map: {
     width: 10,
@@ -28,6 +28,12 @@ export const mutations = {
   },
   setImages (state, { images }) {
     state.images = images
+  },
+  addImage (state, { image }) {
+    state.images.push(image)
+  },
+  deleteImage (state, { id }) {
+    state.images.splice(state.images.findIndex(i => i.id === id), 1)
   },
   setMap (state, { map }) {
     state.map = map

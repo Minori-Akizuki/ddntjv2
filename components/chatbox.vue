@@ -4,7 +4,7 @@
       id="chatbox"
       dragSelector=".draggable"
       left="0"
-      top="80vw"
+      top="50vh"
       width="500"
       active="['rb']"
     >
@@ -14,10 +14,10 @@
           v-for="message in messages"
           v-cloak
           :key="message.id"
-          v-bind:style="{color:message.color, height:messageHeight(message.text)}"
+          :style="{color:message.color, height:messageHeight(message.text)}"
           class="message"
         >
-  {{ message.text }}
+{{ message.text }}
         </pre>
       </div>
       <div class="input-settings">

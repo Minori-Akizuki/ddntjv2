@@ -2,7 +2,7 @@
   <div id="imageWindow" class="draggable">
     <div id="image-list">
       <img
-        v-for="image in imageList.list"
+        v-for="image in images"
         :key="image.id"
         :src="image.bin"
         class="preview-item-file"
@@ -10,18 +10,21 @@
       >
     </div>
     <img
+      v-if="selectedImage"
       :src="selectedImage.bin"
       class="preview-item-file"
     >
-    {{ selectedImage.name }}
+    <div v-if="selectedImage">
+      {{ selectedImage.name }}
+    </div>
     <b-button
-      v-if="selection"
+      v-if="selectionMode"
       @click="decidedImage"
     >
       画像決定
     </b-button>
     <b-button
-      v-else
+      v-if="selectedImage"
       @click="deleteImage"
     >
       画像削除
@@ -40,7 +43,7 @@
           class="preview-item-btn"
         >
           <p class="preview-item-name">
-            {{ img_name }}
+            {{ imageName }}
           </p>
           <b-button size="sm" variant="success" @click="add">
             追加
@@ -79,12 +82,16 @@ export default {
   data () {
     return {
       selectedImage: null,
-      imageName: ''
+      imageName: '',
+      uploadedImage: false
     }
   },
   computed: {
     images () {
       return this.$store.getters.images
+    },
+    socketRoom () {
+      return this.$store.getters.socket('room')
     }
   },
   mounted () {
@@ -97,7 +104,7 @@ export default {
     onFileChange (e) {
       const files = e.target.files || e.dataTransfer.files
       this.createImage(files[0])
-      this.img_name = files[0].name
+      this.imageName = files[0].name
     },
     createImage (file) {
       const reader = new FileReader()
@@ -105,9 +112,22 @@ export default {
       reader.readAsDataURL(file)
     },
     deleteImage () {
+      this.socketRoom.emit('images.delete', this.selectedImage.id)
+      this.selectedImage = null
     },
-    add () {},
-    remobe () {},
+    add () {
+      const _this = this
+      this.socketRoom.emit('images.add', {
+        name: _this.imageName,
+        bin: _this.uploadedImage,
+        id: Date.now().toString(16)
+      })
+      this.img_name = ''
+      this.uploadedImage = ''
+    },
+    remove () {
+      this.uploadedImage = false
+    },
     decidedImage () {}
   }
 }

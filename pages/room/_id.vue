@@ -20,6 +20,7 @@
         </b-navbar-nav>
       </b-collapse>
     </b-navbar>
+    <imagelist />
     <trpgmap />
     <chatbox />
   </div>
@@ -29,6 +30,7 @@
 import io from 'socket.io-client'
 import chatbox from '~/components/chatbox.vue'
 import trpgmap from '~/components/map.vue'
+import imagelist from '~/components/imageList.vue'
 
 export default {
   validate ({ params }) {
@@ -36,7 +38,8 @@ export default {
   },
   components: {
     chatbox,
-    trpgmap
+    trpgmap,
+    imagelist
   },
   data () {
     return {
@@ -61,6 +64,16 @@ export default {
     })
     this.socket.emit('roomData', this.roomNo)
     this.socket.emit('enterRoom', this.roomNo, 'plh')
+    this.socket.on('images', (images) => {
+      _this.$store.commit('setImages', { images })
+    })
+    this.socket.emit('images')
+    this.socket.on('images.add', (image) => {
+      _this.$store.commit('addImage', { image })
+    })
+    this.socket.on('images.delete', (id) => {
+      _this.$store.commit('deleteImage', { id })
+    })
   },
   mounted () {
 
