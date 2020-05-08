@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div>
+    <div class="centering">
       <logo />
       <h1 class="title">
         ddntjv2
@@ -18,23 +18,89 @@
         </a>
       </div>
       <div>
-        <nuxt-link to="room/1">
-          入室
-        </nuxt-link>
         <b-form-select
           v-model="selectedRoom"
-          :options="rooms"
+          :options="roomsSelectForm"
           size="sm"
           class="w-50 mt-3"
         />
+        <b-row>
+          <b-col cols="5">
+            パスワード(あれば)
+          </b-col>
+          <b-col cols="7">
+            <b-form-input
+              id="password"
+              v-model="password"
+              type="password"
+              size="sm"
+              :state="checkPassword"
+            />
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col>
+            <b-button
+              :disabled="enterRoomButtonDisabled"
+              @click="enterRoom"
+            >
+              入室/作成
+            </b-button>
+          </b-col>
+        </b-row>
       </div>
     </div>
+    <b-modal
+      id="crateRoom"
+      ref="createRoom"
+      title="部屋作成"
+      @ok="createRoom"
+    >
+      <b-row>
+        <b-col sm="3">
+          部屋名
+        </b-col>
+        <b-col sm="9">
+          <b-form-input
+            v-model="newRoomName"
+            type="text"
+          />
+        </b-col>
+      </b-row>
+      <b-row>
+        <b-col sm="3">
+          パスワード
+        </b-col>
+        <b-col sm="9">
+          <b-form-input
+            v-model="newRoomPassword"
+            type="text"
+          />
+        </b-col>
+      </b-row>
+      <b-row>
+        <b-col sm="3">
+          システム
+        </b-col>
+        <b-col sm="9">
+          <b-form-select
+            v-model="selectedSystem"
+            :options="systems"
+          />
+        </b-col>
+      </b-row>
+    </b-modal>
+    <b-modal ref="error" ok-only>
+      {{ error.message }}
+    </b-modal>
   </div>
 </template>
 
 <script>
 import io from 'socket.io-client'
 import Logo from '~/components/Logo.vue'
+
+const sha = require('js-sha256')
 
 export default {
   components: {
@@ -44,22 +110,106 @@ export default {
     return {
       socket: null,
       selectedRoom: null,
-      rooms: [
-        { value: 1, text: 'room1' }
-      ]
+      rooms: [],
+      selectedSystem: null,
+      roomName: '',
+      password: '',
+      showPasswordError: false,
+      newRoomPassword: '',
+      newRoomName: '',
+      error: ''
+    }
+  },
+  computed: {
+    roomsSelectForm () {
+      const ret = this.rooms.map((r) => {
+        return {
+          value: r.roomNo,
+          text: r.isCreated ? `${r.roomNo} : ${r.text}(${r.system})` : `${r.roomNo} : 未作成`
+        }
+      })
+      ret.unshift({ value: null, text: '部屋を選択してください' })
+      return ret
+    },
+    enterRoomButtonDisabled () {
+      return !Number.isInteger(this.selectedRoom)
+    },
+    checkPassword () {
+      if (this.selectedRoom === null) {
+        return true
+      }
+      if (this.rooms[this.selectedRoom].password === '') {
+        return true
+      }
+      const hash = sha.sha256(this.password)
+      return hash === this.rooms[this.selectedRoom].password
+    },
+    systems () {
+      return this.$store.getters.systemsToSelection
     }
   },
   created () {
   },
   mounted () {
+    const _this = this
     const socket = io()
     this.$store.commit('setSocket', { socket, name: 'main' })
     this.socket = this.$store.getters.socket('main')
+    this.socket.on('roomsinfo', (data) => {
+      _this.rooms = data
+    })
+    this.socket.on('systems', (systems) => {
+      console.log('recieve systems', systems)
+      this.$store.commit('setSystems', { systems: systems.names })
+    })
+    this.socket.emit('roomsinfo')
+    this.socket.emit('systems')
+    this.socket.on('createRoom.success', () => {
+      console.log('roomCreated')
+      _this.$router.push(`/room/${_this.selectedRoom}?password=${_this.newRoomPassword}`)
+    })
+    this.socket.on('createRoom.error', (err) => {
+      console.log('error in create room')
+      _this.error = err
+      _this.$refs.error.show()
+    })
   },
   methods: {
+    roomsinfo () {
+      this.socket.emit('roomsinfo')
+    },
+    enterRoom () {
+      const room = this.rooms[this.selectedRoom]
+      if (!room.isCreated) {
+        this.$refs.createRoom.show()
+        return
+      }
+      if (room.isCreated && this.checkPassword) {
+        this.$router.push(`/room/${this.selectedRoom}?password=${this.password}`)
+      }
+    },
+    createRoom () {
+      const password = this.newRoomPassword
+      const roomName = this.newRoomName
+      const system = this.selectedSystem
+      const roomId = this.selectedRoom
+      this.socket.emit('createRoom', {
+        roomId,
+        roomName,
+        password,
+        system
+      })
+    }
   }
 }
 </script>
 
-<style>
+<style scoped>
+.container .centering{
+  text-align: center;
+}
+
+#passwprd{
+  max-width: 70vw;
+}
 </style>

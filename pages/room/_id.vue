@@ -40,16 +40,28 @@ export default {
   data () {
     return {
       socket: {},
-      roomNo: null
+      roomNo: null,
+      roomData: null
+    }
+  },
+  computed: {
+    map () {
+      return this.$stoer.getters.map
     }
   },
   mounted () {
+    const _this = this
     this.roomNo = this.$route.params.id
     this.socket = this.$store.getters.socket('main')
+    this.socket.on('roomData', (data) => {
+      _this.setRoomData(data)
+    })
   },
   methods: {
-    sendEve () {
-      this.socket.emit('ev', 'hogehoge')
+    setRoomData (data) {
+      this.roomData = data
+      this.$store.commit('setMap', data.map)
+      delete this.roomData.map
     }
   }
 }

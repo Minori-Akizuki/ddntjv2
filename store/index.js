@@ -1,3 +1,4 @@
+export const strict = false
 export const state = () => ({
   sockets: {},
   systems: [],
@@ -19,6 +20,16 @@ export const state = () => ({
 export const mutations = {
   setSocket (state, { socket, name }) {
     state.sockets[name] = socket
+  },
+  setSystems (state, { systems }) {
+    state.systems.splice(0)
+    state.systems.push(...systems)
+  },
+  setImages (state, { images }) {
+    state.images = images
+  },
+  setMap (state, { map }) {
+    state.map = map
   }
 }
 
@@ -37,5 +48,16 @@ export const getters = {
   },
   imageById: state => (id) => {
     return state.images[state.images.findIndex(i => i.id === id)]
+  },
+  systems (state) {
+    return state.systems
+  },
+  systemsToSelection (state) {
+    return state.systems.map((s) => {
+      return {
+        value: s.system,
+        text: s.name
+      }
+    })
   }
 }

@@ -4,9 +4,12 @@
     class="draggable"
   >
     <div id="map-preview">
-      <img id="map-image" :src="mapImage(map)"><br/>
+      <img id="map-image" :src="mapImage(map)"><br>
       <b-button
-        @click="openImageWindow">画像変更</b-button>
+        @click="openImageWindow"
+      >
+        画像変更
+      </b-button>
     </div>
     <div>
       <imageList
@@ -43,7 +46,9 @@
           />
         </b-col>
       </b-row>
-      <b-button @click="$emit('closeMapConfig',map)">閉じる</b-button>
+      <b-button @click="$emit('closeMapConfig',map)">
+        閉じる
+      </b-button>
     </div>
   </div>
 </template>
@@ -56,10 +61,12 @@ export default {
   },
   data () {
     return {
-      map: this.$store.getters.map
     }
   },
   computed: {
+    map () {
+      return this.$store.getters.map
+    }
   },
   mounted () {
   },

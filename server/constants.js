@@ -3,14 +3,15 @@ exports.constants = () => {
     DB_HOST: 'localhost',
     DB_PORT: '5984',
     DB_USERPASS: 'admin:admin',
-    DB_PREFIX: 'ddntj_test',
-    ROOM_TOTAL: 3,
+    DB_PREFIX: 'dtj',
+    ROOM_TOTAL: 1,
     INITDATA: {
       master: {
         mages: []
       },
       room: {
         isCreated: false,
+        roomNo: null,
         roomName: '',
         password: '',
         system: '',

@@ -88,6 +88,7 @@ export default {
     }
   },
   mounted () {
+    window.$('draggable').draggable()
   },
   methods: {
     selectImage (i) {
