@@ -84,14 +84,22 @@ export default {
   computed: {
     systems () {
       return this.$store.getters.systemsToSelection
+    },
+    socketRoom () {
+      return this.$store.getters.socket('room')
     }
   },
   mounted () {
+    const _this = this
+    this.socketRoom.on('chat.receive', function (msg) {
+      console.log('chat recieve')
+      _this.addMessage(msg)
+    })
   },
   methods: {
     addMessage (msg) {
+      console.log('add msg')
       this.messages.push(msg)
-      this.inputbox = ''
       if (this.autoScroll) {
         this.$nextTick(() => {
           const messageBox = document.getElementById('chatmessages')
@@ -100,12 +108,13 @@ export default {
       }
     },
     sendMessage (event) {
-      if (!event.getModifierState('Shift')) {
+      if (!event.getModifierState('Control') && !event.getModifierState('Meta')) {
         return
       }
       const text = `${this.name} : ${this.inputbox.trimEnd()}`
       const message = { id: Date.now(), color: this.inputColor, text }
-      this.addMessage(message)
+      this.socketRoom.emit('chat.send', message)
+      this.inputbox = ''
     },
     manageAutoScrollFlag () {
       const messageBox = document.getElementById('chatmessages')

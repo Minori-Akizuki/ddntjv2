@@ -50,7 +50,7 @@ export default {
       return this.$stoer.getters.map
     }
   },
-  mounted () {
+  beforeMount () {
     const _this = this
     this.roomNo = this.$route.params.id
     const socket = io()
@@ -60,6 +60,10 @@ export default {
       _this.setRoomData(data)
     })
     this.socket.emit('roomData', this.roomNo)
+    this.socket.emit('enterRoom', this.roomNo, 'plh')
+  },
+  mounted () {
+
   },
   methods: {
     setRoomData (data) {

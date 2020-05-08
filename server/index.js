@@ -195,12 +195,15 @@ async function start () {
     consola.info(`user ${id} connected`)
 
     socket.on('enterRoom', (_roomNo, name) => {
+      consola.info(`${id} enter room ${_roomNo}`)
       if (roomNo) {
         leaveRoom(roomNo, id)
       }
       roomNo = _roomNo
-      socket.join(roomNo)
-      rooms[roomNo].member.push({ id, name })
+      socket.join(roomNo, () => {
+        consola.info(socket.rooms)
+        rooms[roomNo].member.push({ id, name })
+      })
     })
 
     socket.on('disconnected', () => {
@@ -211,7 +214,8 @@ async function start () {
     })
 
     socket.on('chat.send', (msg) => {
-      io.to(roomNo).emit('chat.receive', msg)
+      consola.info('chat receive')
+      io.to(roomNo + '').emit('chat.receive', msg)
     })
 
     socket.on('systems', () => {
