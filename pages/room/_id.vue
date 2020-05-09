@@ -13,14 +13,18 @@
         </b-navbar-nav>
         <b-navbar-nav>
           <b-nav-item-dropdown text="画像類" right>
-            <b-dropdown-item>画像</b-dropdown-item>
+            <b-dropdown-item @click="openImageWindow">画像</b-dropdown-item>
             <b-dropdown-item disabled>動画</b-dropdown-item>
             <b-dropdown-item disabled>音源</b-dropdown-item>
           </b-nav-item-dropdown>
         </b-navbar-nav>
       </b-collapse>
     </b-navbar>
-    <imagelist />
+    <imagelist
+      ref="mainImageWindow"
+      selection-mode="true"
+      selected-callback="imageSelectCallback"
+    />
     <trpgmap />
     <chatbox />
   </div>
@@ -83,6 +87,12 @@ export default {
       this.roomData = data
       this.$store.commit('setMap', data.map)
       delete this.roomData.map
+    },
+    imageSelectCallback (i) {
+      console.log(i)
+    },
+    openImageWindow () {
+      this.$refs.mainImageWindow.show()
     }
   }
 }

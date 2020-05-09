@@ -1,5 +1,9 @@
 <template>
-  <div id="imageWindow" class="draggable">
+  <div
+    v-if="isShow"
+    id="imageWindow"
+    class="draggable"
+  >
     <div id="image-list">
       <img
         v-for="image in images"
@@ -59,7 +63,7 @@
         @change="onFileChange"
       />
     </div>
-    <b-button @click="$emit('closeImageWindow')">
+    <b-button @click="hide()">
       閉じる
     </b-button>
   </div>
@@ -83,7 +87,8 @@ export default {
     return {
       selectedImage: null,
       imageName: '',
-      uploadedImage: false
+      uploadedImage: false,
+      isShow: false
     }
   },
   computed: {
@@ -128,7 +133,23 @@ export default {
     remove () {
       this.uploadedImage = false
     },
-    decidedImage () {}
+    decidedImage () {},
+    show () {
+      this.isShow = true
+      this.$nextTick(
+        () => { window.$('.draggable').draggable() }
+      )
+    },
+    hide () {
+      this.isShow = false
+    },
+    toggle () {
+      if (this.isShow) {
+        this.hide()
+      } else {
+        this.show()
+      }
+    }
   }
 }
 </script>
