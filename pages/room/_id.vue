@@ -23,8 +23,9 @@
     <imagelist
       ref="mainImageWindow"
       selection-mode="true"
-      selected-callback="imageSelectCallback"
+      :selected-callback="imageSelectCallback"
     />
+    <characters />
     <trpgmap />
     <chatbox />
   </div>
@@ -35,6 +36,7 @@ import io from 'socket.io-client'
 import chatbox from '~/components/chatbox.vue'
 import trpgmap from '~/components/map.vue'
 import imagelist from '~/components/imageList.vue'
+import characters from '~/components/characters.vue'
 
 export default {
   validate ({ params }) {
@@ -43,7 +45,8 @@ export default {
   components: {
     chatbox,
     trpgmap,
-    imagelist
+    imagelist,
+    characters
   },
   data () {
     return {

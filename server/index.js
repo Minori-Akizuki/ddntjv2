@@ -290,6 +290,17 @@ async function start () {
       images = await dbMaster.get(IDs.images)
       io.emit('images.delete', id)
     })
+    socket.on('status.init', () => {
+      const status = rooms[roomNo].roomData.status.value
+      consola.info(`status.init to ${id}`)
+      io.to(id).emit('status.init', status)
+    })
+    socket.on('chits.init', () => {
+      const chits = rooms[roomNo].roomData.chits.value
+      consola.info(`chits.init to ${id}`)
+      io.to(id).emit('chits.init', chits)
+    })
+
   })
 }
 start()

@@ -3,10 +3,7 @@ export const strict = false
 export const state = () => ({
   sockets: {},
   systems: [],
-  chits: [
-    { id: 1, bin: null, name: 'testChit', initiative: 0, status: {}, memo: 'hogehoge' },
-    { id: 2, bin: null, name: 'testChit2', initiative: 0, status: {}, memo: 'hugahuga' }
-  ],
+  chits: [],
   map: {
     width: 10,
     height: 10,
@@ -37,6 +34,32 @@ export const mutations = {
   },
   setMap (state, { map }) {
     state.map = map
+  },
+  setChits (state, { chits }) {
+    state.chits = chits
+  },
+  addChit (state, { chit }) {
+    if (state.chits.findIndex(c => c.id === chit.id) !== -1) {
+      throw new Error('duplicate chit id')
+    }
+    state.chits.push(chit)
+  },
+  deleteChit (state, { id }) {
+    state.chits.splite(state.chits.findIndex(c => c.id === id), 1)
+  },
+  updateChitStatus (state, { id, status }) {
+    const index = state.chits.findIndex(c => c.id === id)
+    if (index === -1) {
+      throw new Error('chit not found')
+    }
+    state.chits[index].status = status
+  },
+  updateChit (state, { chit }) {
+    const index = state.chits.findIndex(c => c.id === chit.id)
+    if (index === -1) {
+      throw new Error('chit not found')
+    }
+    state.chits[index] = chit
   }
 }
 
@@ -49,6 +72,9 @@ export const getters = {
   },
   chits (state) {
     return state.chits
+  },
+  chit: state => (id) => {
+    return state.chits[state.chits.findIndex(c => c.id === id)]
   },
   images (state) {
     return state.images
