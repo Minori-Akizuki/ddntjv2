@@ -5,8 +5,8 @@
       dragSelector=".draggable"
       left="0"
       top="50vh"
-      width="500"
-      :active="['rb']"
+      width="90vw"
+      :active="['rb','r','b']"
     >
       <div class="draggable" />
       <div id="chatmessages" @scroll="manageAutoScrollFlag()">
@@ -70,6 +70,8 @@
 <script>
 export default {
   components: {
+  },
+  props: {
   },
   data () {
     return {

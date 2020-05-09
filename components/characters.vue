@@ -1,189 +1,55 @@
 <template>
-  <div id="characters" class="draggable resizable">
-    <div>
-      <table id="list" border="1">
-        <tr>
-          <th>In</th>
-          <th>名前</th>
-          <th v-for="stat in statusName" :key="stat.name" class="stat">
-            {{ stat.name }}
-          </th>
-          <th class="memo">
-            メモ
-          </th>
-          <th />
-        </tr>
-        <tr v-for="chit in chits" :key="chit.id">
-          <td>
-            <b-input
-              id="type-number input-small"
-              v-model.number="chit.initiative"
-              type="number"
-              size="sm"
-              @change="$emit('update:chit',chit)"
-            />
-          </td>
-          <td>{{ chit.name }}</td>
-          <td
-            v-for="stat in chit.status"
-            :key="stat.name"
-          >
-            <b-checkbox v-if="stat.type=='bool'" v-model="stat.value" @change="$emit('update:chit',chit)" />
-            <b-input
-              v-else
-              id="type-number input-small"
-              v-model.number="stat.value"
-              type="number"
-              size="sm"
-              @change="$emit('update:chit',chit)"
-            />
-          </td>
-          <td>
-            <b-textarea
-              v-model="chit.memo"
-              size="sm"
-              @change="$emit('update:chit',chit)"
-            />
-          </td>
-          <td>
-            <b-button v-b-modal="'edit'+chit.id" size="sm">
-              編集
-            </b-button>
-            <b-modal
-              :id="'edit'+chit.id"
-              :ref="'edit'+chit.id"
-              title="キャラ編集"
-              ok-only
-            >
-              <b-modal
-                :id="'img'+chit.id"
-                :ref="'img'+chit.id"
-                title="画像選択"
-                size="lg"
-                ok-only
-              >
-                <imagelist
-                  selection-mode="true"
-                  :selected-callback="decidedImageCallback"
-                />
-              </b-modal>
-              <img
-                :src="imgFromChit(chit)"
-                @click="openImageList(chit)"
-              >
-              <table>
-                <tr>
-                  <th>In</th>
-                  <th>名前</th>
-                  <th>キャラ</th>
-                  <th v-for="stat in statusName" :key="stat.name">
-                    {{ stat.name }}
-                  </th>
-                  <th>メモ</th>
-                  <th />
-                </tr>
-                <tr>
-                  <td>
-                    <b-input
-                      id="type-number stat input-small"
-                      v-model.number="chit.initiative"
-                      type="number"
-                      size="sm"
-                    />
-                  </td>
-                  <td>
-                    <b-input
-                      v-model="chit.name"
-                      size="sm"
-                    />
-                  </td>
-                  <td>
-                    <b-checkbox v-model="chit.character" />
-                  </td>
-                  <td
-                    v-for="stat in chit.status"
-                    :key="stat.name"
-                  >
-                    <b-checkbox
-                      v-if="stat.type=='bool'"
-                      v-model="stat.value"
-                      :disabled="!chit.character"
-                    />
-                    <b-input
-                      v-else
-                      id="type-number stat input-small"
-                      v-model.number="stat.value"
-                      :disabled="!chit.character"
-                      type="number"
-                      size="sm"
-                    />
-                  </td>
-                  <td><b-textarea v-model="chit.memo" size="sm" /></td>
-                </tr>
-              </table>
-              <b-button v-b-modal="'delete'+chit.id" variant="danger">
-                削除
-              </b-button>
-              <b-modal :id="'delete'+chit.id" @ok="deleteChit(chit)">
-                本当に削除しますか？
-              </b-modal>
-            </b-modal>
-          </td>
-        </tr>
-      </table>
-    </div>
-    <div id="addChit">
-      <b-button
-        v-b-modal.addCharcterModal
-        size="sm"
+  <div>
+    <imagelist
+      :selection-mode="true"
+      :selected-callback="decidedImageCallback"
+    />
+    <vue-resizable
+      id="characters"
+      drag-selector=".c-dselector"
+      :active="['r','b','rb']"
+      width="50vw"
+      left="50%"
+      top="60%"
+    >
+      <div class="c-dselector" />
+      <b-table
+        :items="chitsData"
+        :fields="tableFields"
       >
-        チット追加
+        <template v-slot:cell(id)>
+          <b-button
+            :v-b-modal="'edit_'+id"
+          >
+            編集
+          </b-button>
+          <b-modal
+            :id="'edit_'+id"
+          >
+            {{ id }}
+          </b-modal>
+        </template>
+      </b-table>
+      <b-button
+        v-b-modal.addChar
+      >
+        キャラ追加
       </b-button>
       <b-modal
-        id="addCharcterModal"
-        ref="newChitModal"
-        title="チット追加"
-        size="lg"
-        @ok="addNewChit"
+        id="addChar"
+        size="xl"
+        title="新規キャラクター追加"
       >
-        <b-modal
-          id="newimg"
-          ref="newimg"
-          title="画像選択"
-          size="lg"
-          ok-only
-        >
-          <imagelist
-            ref="charImageWindow"
-            selection-mode="true"
-            :selected-callback="decidedImageCallback"
-          />
-        </b-modal>
-        <img
-          :src="imgFromChit(newChit)"
-          @click="openImageListNew(newChit)"
-        >
-
         <table>
           <tr>
-            <th>In</th>
             <th>名前</th>
-            <th>キャラ</th>
-            <th v-for="stat in statusName" :key="stat.name">
+            <th>in</th>
+            <th v-for="stat in statusName" :key="stat.name" class="stat">
               {{ stat.name }}
             </th>
             <th>メモ</th>
-            <th />
           </tr>
           <tr>
-            <td>
-              <b-input
-                id="type-number stat input-small"
-                v-model.number="newChit.initiative"
-                type="number"
-                size="sm"
-              />
-            </td>
             <td>
               <b-input
                 v-model="newChit.name"
@@ -191,7 +57,12 @@
               />
             </td>
             <td>
-              <b-checkbox v-model="newChit.character" />
+              <b-input
+                id="type-number stat input-small"
+                v-model.number="newChit.initiative"
+                type="number"
+                size="sm"
+              />
             </td>
             <td
               v-for="stat in newChit.status"
@@ -211,20 +82,16 @@
                 size="sm"
               />
             </td>
-            <td><b-textarea v-model="newChit.memo" size="sm" /></td>
+            <td>
+              <b-textarea
+                v-model="newChit.memo"
+                size="sm"
+              />
+            </td>
           </tr>
         </table>
       </b-modal>
-    </div>
-    <div>
-      <b-button v-b-modal.editStat size="sm">
-        ステータス項目編集
-      </b-button>
-      <b-modal id="editStat" @ok="setStatusOwn">
-        半角句切りでパラメータを入力してください。「*」をつけた項目はチェックボックスになります。
-        <b-input v-model="statusStr" />
-      </b-modal>
-    </div>
+    </vue-resizable>
   </div>
 </template>
 
@@ -260,6 +127,35 @@ export default {
     },
     socketRoom () {
       return this.$store.getters.socket('room')
+    },
+    tableFieldsNew () {
+      const fields = [
+        { key: 'name', label: '名前' },
+        { key: 'initiative', sortable: true, label: 'In' }
+      ]
+      for (const s of this.statusName) {
+        fields.push({ key: s.name, label: s.name })
+      }
+      fields.push({ key: 'memo', label: 'メモ' })
+      return fields
+    },
+    tableFields () {
+      const fields = this.tableFieldsNew.concat()
+      fields.push({ key: 'id', label: '' })
+      return fields
+    },
+    chitsData () {
+      const datas = this.chits.map((c) => {
+        const tmp = {
+          name: c.name,
+          initiative: c.initiative,
+          id: c.id
+        }
+        for (const s in c.status) {
+          tmp[s] = c.status[s]
+        }
+      })
+      return datas
     }
   },
   watch: {
@@ -362,7 +258,7 @@ export default {
         })
         return status
       }
-      for (const c in this.chits) {
+      for (const c of this.chits) {
         this.$store.commit(
           'updateChitStatus',
           {
@@ -407,6 +303,9 @@ export default {
       console.log(img)
       // TODO : このreturnを遅延させる必要がある
       return img.bin
+    },
+    openChitEdit (id) {
+      console.log(id)
     }
   }
 }
@@ -421,11 +320,17 @@ export default {
   display: flex;
   flex-direction: column;
   height: fit-content;
-  padding: 0.5em;
+  padding: 0em;
   position: absolute;
   overflow: scroll;
   z-index: 3;
   width: 600px;
+}
+
+.c-dselector{
+  width: 100%;
+  height: 10px;
+  background-color: #808080;
 }
 
 th.memo{

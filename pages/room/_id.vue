@@ -27,7 +27,9 @@
     />
     <characters />
     <trpgmap />
-    <chatbox />
+    <chatbox
+      ref="chatbox"
+    />
   </div>
 </template>
 
@@ -68,6 +70,7 @@ export default {
     this.socket = this.$store.getters.socket('room')
     this.socket.on('roomData', (data) => {
       _this.setRoomData(data)
+      _this.$refs.chatbox.selectedSystem = _this.roomData.system
     })
     this.socket.emit('roomData', this.roomNo)
     this.socket.emit('enterRoom', this.roomNo, 'plh')
@@ -83,7 +86,6 @@ export default {
     })
   },
   mounted () {
-
   },
   methods: {
     setRoomData (data) {
