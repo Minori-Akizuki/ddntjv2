@@ -22,7 +22,7 @@
     </b-navbar>
     <imagelist
       ref="mainImageWindow"
-      selection-mode="true"
+      :selection-mode="true"
       :selected-callback="imageSelectCallback"
     />
     <characters />

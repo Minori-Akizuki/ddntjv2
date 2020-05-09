@@ -362,14 +362,15 @@ export default {
         })
         return status
       }
-      this.chits.foreach((c) => {
+      for (const c in this.chits) {
         this.$store.commit(
           'updateChitStatus',
           {
             id: c.id,
             status: copyStatus(this.statusName)
-          })
-      })
+          }
+        )
+      }
       // 雛形のセット
       this.newChit = this.copyNewChit({})
     },

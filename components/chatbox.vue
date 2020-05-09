@@ -6,7 +6,7 @@
       left="0"
       top="50vh"
       width="500"
-      active="['rb']"
+      :active="['rb']"
     >
       <div class="draggable" />
       <div id="chatmessages" @scroll="manageAutoScrollFlag()">
