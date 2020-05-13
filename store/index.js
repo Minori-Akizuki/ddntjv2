@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import io from 'socket.io-client'
 export const strict = false
 export const state = () => ({
   sockets: {},
@@ -16,7 +17,11 @@ export const state = () => ({
 })
 
 export const mutations = {
-  setSocket (state, { socket, name }) {
+  setSocket (state, { name }) {
+    if (state.sockets[name]) {
+      return
+    }
+    const socket = io()
     Vue.set(state.sockets, name, socket)
   },
   setSystems (state, { systems }) {
@@ -39,6 +44,7 @@ export const mutations = {
     state.chits = chits
   },
   addChit (state, { chit }) {
+    console.log('state.addChit', chit.toString())
     if (state.chits.findIndex(c => c.id === chit.id) !== -1) {
       throw new Error('duplicate chit id')
     }
@@ -61,6 +67,10 @@ export const mutations = {
     }
     state.chits[index] = chit
   }
+}
+
+export const actions = {
+
 }
 
 export const getters = {

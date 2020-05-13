@@ -34,7 +34,6 @@
 </template>
 
 <script>
-import io from 'socket.io-client'
 import chatbox from '~/components/chatbox.vue'
 import trpgmap from '~/components/map.vue'
 import imagelist from '~/components/imageList.vue'
@@ -60,28 +59,29 @@ export default {
   computed: {
     map () {
       return this.$stoer.getters.map
+    },
+    socketRoom () {
+      return this.$store.getters.socket('room')
     }
   },
   beforeMount () {
     const _this = this
     this.roomNo = this.$route.params.id
-    const socket = io()
-    this.$store.commit('setSocket', { socket, name: 'room' })
-    this.socket = this.$store.getters.socket('room')
-    this.socket.on('roomData', (data) => {
+    this.$store.commit('setSocket', { name: 'room' })
+    this.socketRoom.on('roomData', (data) => {
       _this.setRoomData(data)
       _this.$refs.chatbox.selectedSystem = _this.roomData.system
     })
-    this.socket.emit('roomData', this.roomNo)
-    this.socket.emit('enterRoom', this.roomNo, 'plh')
-    this.socket.on('images', (images) => {
+    this.socketRoom.emit('roomData', this.roomNo)
+    this.socketRoom.emit('enterRoom', this.roomNo, 'plh')
+    this.socketRoom.on('images', (images) => {
       _this.$store.commit('setImages', { images })
     })
-    this.socket.emit('images')
-    this.socket.on('images.add', (image) => {
+    this.socketRoom.emit('images')
+    this.socketRoom.on('images.add', (image) => {
       _this.$store.commit('addImage', { image })
     })
-    this.socket.on('images.delete', (id) => {
+    this.socketRoom.on('images.delete', (id) => {
       _this.$store.commit('deleteImage', { id })
     })
   },

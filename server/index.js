@@ -5,6 +5,7 @@ const app = express()
 const socket = require('socket.io')
 const _nano = require('nano')
 const sha = require('js-sha256')
+const _ = require('lodash')
 
 const IDs = {
   images: 'images',
@@ -291,6 +292,7 @@ async function start () {
       io.emit('images.delete', id)
     })
     socket.on('status.init', () => {
+      if (!roomNo) { return }
       const status = rooms[roomNo].roomData.status.value
       consola.info(`status.init to ${id}`)
       io.to(id).emit('status.init', status)
@@ -300,7 +302,26 @@ async function start () {
       consola.info(`chits.init to ${id}`)
       io.to(id).emit('chits.init', chits)
     })
-
+    socket.on('chit.add', async (chit) => {
+      consola.info('----chit.add')
+      const chits = rooms[roomNo].roomData.chits
+      const dbRoom = rooms[roomNo].roomDb
+      chits.value.push(chit)
+      await dbRoom.insert(chits, IDs.chits)
+      rooms[roomNo].roomData.chits = await dbRoom.get(IDs.chits)
+      io.to(roomNo + '').emit('chit.add', chit)
+    })
+    socket.on('chit.update', async (chit) => {
+      consola.info('---chit.update')
+      consola.info(chit)
+      const chits = rooms[roomNo].roomData.chits
+      const dbRoom = rooms[roomNo].roomDb
+      chits.value = _.reject(chits.value, { id: chit.id })
+      chits.value.push(chit)
+      await dbRoom.insert(chits, IDs.chits)
+      rooms[roomNo].roomData.chits = await dbRoom.get(IDs.chits)
+      io.to(roomNo + '').emit('chit.update', chit)
+    })
   })
 }
 start()

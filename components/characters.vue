@@ -1,6 +1,7 @@
 <template>
   <div>
     <imagelist
+      ref="chitImagelist"
       :selection-mode="true"
       :selected-callback="decidedImageCallback"
     />
@@ -14,19 +15,97 @@
     >
       <div class="c-dselector" />
       <b-table
-        :items="chitsData"
+        :items="chitsDataBuf"
         :fields="tableFields"
       >
-        <template v-slot:cell(id)>
+        <template v-slot:cell(name)="data">
+          {{ data.value }}
+        </template>
+        <template v-slot:cell()="data">
+          <b-checkbox
+            v-if="data.value===true || data.value===false"
+            v-model="data.value"
+            @change="updateChit({ event:$event, field:data.field.key, value:data.value, id:data.item.id })"
+          />
+          <b-input
+            v-else
+            v-model="data.value"
+            size="sm"
+            type="number"
+            @change="updateChit({ event:$event, field:data.field.key, value:data.value, id:data.item.id })"
+          />
+        </template>
+        <template v-slot:cell(memo)="data">
+          <b-textarea
+            v-model="data.value"
+            size="sm"
+            @change="updateChit({ event:$event, field:data.field.key, value:data.value, id:data.item.id })"
+          />
+        </template>
+        <template v-slot:cell(id)="data">
           <b-button
-            :v-b-modal="'edit_'+id"
+            :v-b-modal="'edit_'+data.value"
+            size="sm"
+            @click="openChitEdit(data.value)"
           >
             編集
           </b-button>
           <b-modal
-            :id="'edit_'+id"
+            :id="'edit_'+data.value"
+            :ref="'edit_'+data.value"
           >
-            {{ id }}
+            <img
+              :src="data.item.img ? imgFromChit(data.img) : ''"
+              @click="openImageList(data.item)"
+            >
+            <table>
+              <tr>
+                <th>名前</th>
+                <th>in</th>
+                <th v-for="stat in statusName" :key="stat.name" class="stat">
+                  {{ stat.name }}
+                </th>
+                <th>メモ</th>
+              </tr>
+              <tr>
+                <td>
+                  <b-input
+                    v-model="data.item.name"
+                    size="sm"
+                  />
+                </td>
+                <td>
+                  <b-input
+                    id="type-number stat input-small"
+                    v-model.number="data.item.initiative"
+                    type="number"
+                    size="sm"
+                  />
+                </td>
+                <td
+                  v-for="stat in statusName"
+                  :key="stat.name"
+                >
+                  <b-checkbox
+                    v-if="stat.type=='bool'"
+                    v-model="data.item[stat.name]"
+                  />
+                  <b-input
+                    v-else
+                    id="type-number stat input-small"
+                    v-model.number="data.item[stat.name]"
+                    type="number"
+                    size="sm"
+                  />
+                </td>
+                <td>
+                  <b-textarea
+                    v-model="data.item.memo"
+                    size="sm"
+                  />
+                </td>
+              </tr>
+            </table>
           </b-modal>
         </template>
       </b-table>
@@ -39,7 +118,12 @@
         id="addChar"
         size="xl"
         title="新規キャラクター追加"
+        @ok="addNewChit"
       >
+        <img
+          :src="newChit.img ? imgFromChit(newChit) : ''"
+          @click="openImageListNew(newChit)"
+        >
         <table>
           <tr>
             <th>名前</th>
@@ -96,6 +180,7 @@
 </template>
 
 <script>
+import _ from 'lodash'
 import imagelist from '~/components/imageList.vue'
 
 class Vector2d {
@@ -118,7 +203,8 @@ export default {
       ],
       statusStr: 'HP MP *poizon',
       newChit: {},
-      decidedImageCallback: null
+      decidedImageCallback: null,
+      chitsDataBuf: []
     }
   },
   computed: {
@@ -143,19 +229,6 @@ export default {
       const fields = this.tableFieldsNew.concat()
       fields.push({ key: 'id', label: '' })
       return fields
-    },
-    chitsData () {
-      const datas = this.chits.map((c) => {
-        const tmp = {
-          name: c.name,
-          initiative: c.initiative,
-          id: c.id
-        }
-        for (const s in c.status) {
-          tmp[s] = c.status[s]
-        }
-      })
-      return datas
     }
   },
   watch: {
@@ -178,12 +251,48 @@ export default {
     this.socketRoom.on('chits.init', (chits) => {
       console.log(`chits init ${chits}`)
       this.$store.commit('setChits', { chits })
-      // TODO: chit 変更イベントの追加
+      this.buffaChitsData()
+    })
+    this.socketRoom.on('chit.add', (chit) => {
+      console.log('chit add')
+      this.$store.commit('addChit', { chit })
+      this.buffaChitsData()
+    })
+    this.socketRoom.on('chit.update', (chit) => {
+      this.$store.commit('updateChit', { chit })
+      this.buffaChitsData()
     })
     this.socketRoom.emit('chits.init')
     this.newChit = this.copyNewChit({})
   },
   methods: {
+    buffaChitsData () {
+      this.chitsDataBuf = _.cloneDeep(this.chitsData())
+    },
+    /**
+     * b-table で扱いやすいようにデータを成型
+     */
+    chitsData () {
+      console.log('chitsData -----')
+      const datas = _.map(this.chits, (c) => {
+        console.log(c)
+        const tmp = {
+          name: c.name,
+          initiative: c.initiative,
+          id: c.id,
+          memo: c.memo,
+          img: c.img
+        }
+        for (const s in c.status) {
+          tmp[c.status[s].name] = c.status[s].value
+        }
+        return tmp
+      })
+      return datas
+    },
+    /**
+     * chit のディープコピーをとってIDを振る
+     */
     copyNewChit (_chit) {
       const chit = {}
       chit.id = Date.now().toString(16)
@@ -202,22 +311,61 @@ export default {
       console.log('create chit ' + chit.toString())
       return chit
     },
+    /**
+     * 新規チットの追加をソケットへ通知
+     */
     addNewChit () {
       console.log(this.newChit.toString())
       const chit = this.copyNewChit(this.newChit)
-      this.$store.commit('addChit', { chit })
+      this.socketRoom.emit('chit.add', chit)
     },
+    updateChit ({ event, field, value, id }) {
+      console.log('update.chit')
+      const rawChit = _.find(this.chits, { id })
+      console.log(field)
+      console.log(value)
+      if (field === 'initiative' ||
+        field === 'id' ||
+        field === 'name' ||
+        field === 'memo' ||
+        field === 'img'
+      ) {
+        console.log('default status')
+        rawChit[field] = value
+      } else {
+        const status = rawChit.status
+        console.log('findstatus')
+        console.log(status[_.findIndex(status, { name: field })])
+        console.log(value)
+        console.log('event', event)
+        status[_.findIndex(status, { name: field })].value = event
+      }
+      console.log(rawChit)
+      this.socketRoom.emit('chit.update', rawChit)
+    },
+    /**
+     * チットの削除とソケットへの通知
+     */
     deleteChit (chit) {
       console.log(`delete chit ${chit.id}`)
       this.$store.commit('deleteChit', { id: chit.id })
     },
+    /**
+     * 自分でステータスを更新してそれをソケットに通知する
+     */
     setStatusOwn () {
       this.setStatus()
       this.socketio.emit('publish.statusChanged', this.statusStr)
     },
+    /**
+     * 他プレイヤーがステータス項目を更新した時
+     */
     setStatusOther (status) {
       this.setStatus(status)
     },
+    /**
+     * ステータス項目を更新する
+     */
     setStatus (status) {
       if (status) {
         this.statusStr = status
@@ -249,13 +397,13 @@ export default {
        */
       const copyStatus = (_status) => {
         const status = []
-        _status.foreach((s) => {
+        for (const s of _status) {
           status.push({
             name: String(s.name),
             type: String(s.type),
             value: Boolean(s.value)
           })
-        })
+        }
         return status
       }
       for (const c of this.chits) {
@@ -270,42 +418,50 @@ export default {
       // 雛形のセット
       this.newChit = this.copyNewChit({})
     },
+    /**
+     * 既存チット用の画像ウィンドウを開く
+     */
     openImageList (chit) {
       this.decidedImageCallback = function (image) {
         console.log('--- decidedImageCallback')
         chit.img = image.id
-        this.$store.commit('updateChit', { chit })
         console.log(chit)
-        this.$refs['img' + chit.id][0].hide()
       }
       console.log(this.$refs['img' + chit.id])
-      this.$refs['img' + chit.id][0].show()
-      // this.$emit('openimagewindow', this.decidedImageCallback);
+      this.$refs.chitImagelist.show()
     },
+    /**
+     * 新規チット用の画像ウィンドウを開く
+     */
     openImageListNew (chit) {
-      const _this = this
       this.decidedImageCallback = function (image) {
         console.log('--- decidedImageCallback(new)')
         chit.img = image.id
         console.log(chit)
-        _this.$refs.newimg.hide()
       }
       console.log(this.$refs.newimg)
-      this.$refs.newimg.show()
-      // this.$emit('openimagewindow', this.decidedImageCallback);
+      this.$refs.chitImagelist.show()
     },
+    /**
+     * チットに対応する画像の検索
+     */
     imgFromChit (chit) {
       console.log('--- imgFromChit')
       console.log(chit)
+      if (!chit) { return '' }
       const img = chit.img
         ? this.$store.getters.imageById(chit.img)
-        : ''
+        : { img: '' }
       console.log(img)
       // TODO : このreturnを遅延させる必要がある
       return img.bin
     },
+    /**
+     * チット編集画面を開く
+     */
     openChitEdit (id) {
       console.log(id)
+      this.$refs['edit_' + id].show()
     }
   }
 }
@@ -329,8 +485,11 @@ export default {
 
 .c-dselector{
   width: 100%;
-  height: 10px;
+  height: 15px;
   background-color: #808080;
+  position: absolute;
+  top: 0px;
+  left:0px;
 }
 
 th.memo{

@@ -4,7 +4,6 @@
   </div>
 </template>
 <script>
-import io from 'socket.io-client'
 export default {
   computed: {
     socketMain () {
@@ -12,8 +11,7 @@ export default {
     }
   },
   beforeMount () {
-    const socket = io()
-    this.$store.commit('setSocket', { socket, name: 'main' })
+    this.$store.commit('setSocket', { name: 'main' })
     this.socketMain.on('systems', (systems) => {
       console.log('recieve systems', systems)
       this.$store.commit('setSystems', { systems: systems.names })

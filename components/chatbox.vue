@@ -26,8 +26,8 @@
           <b-row>
             <b-col sm="5">
               <b-form-input
-                size="sm"
                 v-model="name"
+                size="sm"
               />
             </b-col>
             <!-- システム選択 -->

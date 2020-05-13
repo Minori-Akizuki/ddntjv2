@@ -133,7 +133,10 @@ export default {
     remove () {
       this.uploadedImage = false
     },
-    decidedImage () {},
+    decidedImage () {
+      this.selectedCallback(this.selectedImage)
+      this.hide()
+    },
     show () {
       this.isShow = true
       this.$nextTick(
@@ -161,9 +164,8 @@ export default {
     height: 300px;
     width: 500px;
     overflow: scroll;
-    z-index: 2;
+    z-index: 2000;
 }
-
 img.preview-item-file{
     height: 50px;
     width: 50px;
