@@ -51,7 +51,7 @@ export const mutations = {
     state.chits.push(chit)
   },
   deleteChit (state, { id }) {
-    state.chits.splite(state.chits.findIndex(c => c.id === id), 1)
+    state.chits.splice(state.chits.findIndex(c => c.id === id), 1)
   },
   updateChitStatus (state, { id, status }) {
     const index = state.chits.findIndex(c => c.id === id)

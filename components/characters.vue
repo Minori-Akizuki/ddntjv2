@@ -8,18 +8,32 @@
     <vue-resizable
       id="characters"
       drag-selector=".c-dselector"
-      :active="['r','b','rb']"
+      :active="['r','b','rb','l']"
       width="50vw"
       left="50%"
       top="60%"
     >
       <div class="c-dselector" />
+      <div class="c-spacer" />
       <b-table
         :items="chitsDataBuf"
         :fields="tableFields"
+        responsive
+        sticky-header
       >
+        <template v-slot:cell(img)="data">
+          <img
+            :src="data.item.img ? imgFromChit(data.item) : ''"
+            @click="openImageList(data.item)"
+          >
+        </template>
         <template v-slot:cell(name)="data">
-          {{ data.value }}
+          <b-form-input
+            v-model="data.value"
+            size="sm"
+            type="text"
+            @change="updateChit({ event:$event, field:data.field.key, value:data.value, id:data.item.id })"
+          />
         </template>
         <template v-slot:cell()="data">
           <b-checkbox
@@ -42,75 +56,25 @@
             @change="updateChit({ event:$event, field:data.field.key, value:data.value, id:data.item.id })"
           />
         </template>
-        <template v-slot:cell(id)="data">
+        <template v-slot:cell(delete)="data">
           <b-button
-            :v-b-modal="'edit_'+data.value"
             size="sm"
-            @click="openChitEdit(data.value)"
+            variant="danger"
+            @click="$refs['delete_'+data.item.id].show()"
           >
-            編集
+            削除
           </b-button>
           <b-modal
-            :id="'edit_'+data.value"
-            :ref="'edit_'+data.value"
+            :ref="'delete_'+data.item.id"
+            @ok="deleteChit(data.item.id)"
           >
-            <img
-              :src="data.item.img ? imgFromChit(data.img) : ''"
-              @click="openImageList(data.item)"
-            >
-            <table>
-              <tr>
-                <th>名前</th>
-                <th>in</th>
-                <th v-for="stat in statusName" :key="stat.name" class="stat">
-                  {{ stat.name }}
-                </th>
-                <th>メモ</th>
-              </tr>
-              <tr>
-                <td>
-                  <b-input
-                    v-model="data.item.name"
-                    size="sm"
-                  />
-                </td>
-                <td>
-                  <b-input
-                    id="type-number stat input-small"
-                    v-model.number="data.item.initiative"
-                    type="number"
-                    size="sm"
-                  />
-                </td>
-                <td
-                  v-for="stat in statusName"
-                  :key="stat.name"
-                >
-                  <b-checkbox
-                    v-if="stat.type=='bool'"
-                    v-model="data.item[stat.name]"
-                  />
-                  <b-input
-                    v-else
-                    id="type-number stat input-small"
-                    v-model.number="data.item[stat.name]"
-                    type="number"
-                    size="sm"
-                  />
-                </td>
-                <td>
-                  <b-textarea
-                    v-model="data.item.memo"
-                    size="sm"
-                  />
-                </td>
-              </tr>
-            </table>
+            本当に「{{ data.item.name }}」を削除しますか?
           </b-modal>
         </template>
       </b-table>
       <b-button
         v-b-modal.addChar
+        size="sm"
       >
         キャラ追加
       </b-button>
@@ -216,6 +180,7 @@ export default {
     },
     tableFieldsNew () {
       const fields = [
+        { key: 'img', label: 'アイコン' },
         { key: 'name', label: '名前' },
         { key: 'initiative', sortable: true, label: 'In' }
       ]
@@ -227,7 +192,7 @@ export default {
     },
     tableFields () {
       const fields = this.tableFieldsNew.concat()
-      fields.push({ key: 'id', label: '' })
+      fields.push({ key: 'delete', label: '' })
       return fields
     }
   },
@@ -262,11 +227,16 @@ export default {
       this.$store.commit('updateChit', { chit })
       this.buffaChitsData()
     })
+    this.socketRoom.on('chit.delete', (id) => {
+      this.$store.commit('deleteChit', { id })
+      this.buffaChitsData()
+    })
     this.socketRoom.emit('chits.init')
     this.newChit = this.copyNewChit({})
   },
   methods: {
     buffaChitsData () {
+      console.log('buffaChitsData')
       this.chitsDataBuf = _.cloneDeep(this.chitsData())
     },
     /**
@@ -315,40 +285,32 @@ export default {
      * 新規チットの追加をソケットへ通知
      */
     addNewChit () {
-      console.log(this.newChit.toString())
+      console.log('addNewChit')
       const chit = this.copyNewChit(this.newChit)
       this.socketRoom.emit('chit.add', chit)
     },
     updateChit ({ event, field, value, id }) {
       console.log('update.chit')
       const rawChit = _.find(this.chits, { id })
-      console.log(field)
-      console.log(value)
       if (field === 'initiative' ||
         field === 'id' ||
         field === 'name' ||
         field === 'memo' ||
         field === 'img'
       ) {
-        console.log('default status')
         rawChit[field] = value
       } else {
         const status = rawChit.status
-        console.log('findstatus')
-        console.log(status[_.findIndex(status, { name: field })])
-        console.log(value)
-        console.log('event', event)
         status[_.findIndex(status, { name: field })].value = event
       }
-      console.log(rawChit)
       this.socketRoom.emit('chit.update', rawChit)
     },
     /**
      * チットの削除とソケットへの通知
      */
-    deleteChit (chit) {
-      console.log(`delete chit ${chit.id}`)
-      this.$store.commit('deleteChit', { id: chit.id })
+    deleteChit (id) {
+      console.log(`delete chit ${id}`)
+      this.socketRoom.emit('chit.delete', id)
     },
     /**
      * 自分でステータスを更新してそれをソケットに通知する
@@ -422,12 +384,13 @@ export default {
      * 既存チット用の画像ウィンドウを開く
      */
     openImageList (chit) {
+      const _this = this
       this.decidedImageCallback = function (image) {
         console.log('--- decidedImageCallback')
         chit.img = image.id
+        _this.updateChit({ value: chit.img, field: 'img', id: chit.id })
         console.log(chit)
       }
-      console.log(this.$refs['img' + chit.id])
       this.$refs.chitImagelist.show()
     },
     /**
@@ -467,7 +430,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
 #characters{
   border: solid #808080;
   background: rgb(243, 243, 243);
@@ -490,10 +453,12 @@ export default {
   position: absolute;
   top: 0px;
   left:0px;
+  z-index: 3;
 }
 
-th.memo{
-    width: 150px;
+.c-dselector{
+  width: 100%;
+  height: 15px;
 }
 
 #editcharcter{

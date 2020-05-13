@@ -322,6 +322,17 @@ async function start () {
       rooms[roomNo].roomData.chits = await dbRoom.get(IDs.chits)
       io.to(roomNo + '').emit('chit.update', chit)
     })
+    socket.on('chit.delete', async (id) => {
+      consola.info('---chit.delete')
+      consola.info(id)
+      const chits = rooms[roomNo].roomData.chits
+      const dbRoom = rooms[roomNo].roomDb
+      chits.value = _.reject(chits.value, { id })
+      await dbRoom.insert(chits, IDs.chits)
+      rooms[roomNo].roomData.chits = await dbRoom.get(IDs.chits)
+      io.to(roomNo + '').emit('chit.delete', id)
+
+    })
   })
 }
 start()

@@ -23,12 +23,14 @@
     </div>
     <b-button
       v-if="selectionMode"
+      variant="primary"
       @click="decidedImage"
     >
       画像決定
     </b-button>
     <b-button
       v-if="selectedImage"
+      variant="danger"
       @click="deleteImage"
     >
       画像削除
@@ -49,7 +51,11 @@
           <p class="preview-item-name">
             {{ imageName }}
           </p>
-          <b-button size="sm" variant="success" @click="add">
+          <b-button
+            size="sm"
+            variant="primary"
+            @click="add"
+          >
             追加
           </b-button>
           <b-button size="sm" @click="remove">
