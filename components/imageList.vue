@@ -165,6 +165,7 @@ export default {
 
 <style>
 #imageWindow{
+    background-color: #888888;
     position: absolute;
     border: 1px solid black;
     height: 300px;
