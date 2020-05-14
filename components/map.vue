@@ -16,7 +16,7 @@
         :key="chit.id"
         class="chit draggable"
       >
-        <div
+        <img
           :id="'chitimg_'+chit.id"
           :src="chitImage(chit)"
           class="chit"
@@ -35,16 +35,22 @@
 </template>
 
 <script>
+import _ from 'lodash'
 export default {
   components: {
   },
   data () {
     return {
-      chits: this.$store.getters.chits,
-      map: this.$store.getters.map
+      chitsBuf: []
     }
   },
   computed: {
+    map () {
+      return this.$store.getters.map
+    },
+    chits () {
+      return this.$store.getters.chits
+    },
     mapStyle () {
       return {
         height: this.map.height * 50 + 'px',
@@ -53,11 +59,15 @@ export default {
     }
   },
   mounted () {
-    window.$('.draggable').draggable()
+    this.chitsBuf = _.cloneDeep(this.chits)
+    this.$nextTick(() => {
+      window.$('.draggable').draggable()
+    })
   },
   methods: {
     chitImage (c) {
-      return ''
+      const img = this.$store.getters.imageById(c.img)
+      return img.bin
     }
   }
 }
@@ -73,7 +83,6 @@ export default {
 }
 
 .chit {
-  background-color: lightsalmon;
   border-width: 1px;
   height: 50px;
   width: 50px;

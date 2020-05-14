@@ -36,6 +36,7 @@
     />
     <trpgmap
       v-if="enterdRoom"
+      ref="trpgmap"
     />
     <chatbox
       v-if="enterdRoom"
