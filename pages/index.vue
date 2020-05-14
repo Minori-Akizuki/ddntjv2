@@ -197,8 +197,14 @@ export default {
 </script>
 
 <style scoped>
-.container .centering{
+.container{
   text-align: center;
+  width: 100%;
+}
+.centering{
+  text-align: center;
+  max-width: 500px;
+  margin: auto;
 }
 
 #passwprd{

@@ -4,7 +4,7 @@ exports.constants = () => {
     DB_PORT: '5984',
     DB_USERPASS: 'admin:admin',
     DB_PREFIX: 'dtj',
-    ROOM_TOTAL: 1,
+    ROOM_TOTAL: 3,
     INITDATA: {
       master: {
         mages: []

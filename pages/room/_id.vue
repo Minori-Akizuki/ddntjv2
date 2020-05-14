@@ -13,9 +13,15 @@
         </b-navbar-nav>
         <b-navbar-nav>
           <b-nav-item-dropdown text="画像類" right>
-            <b-dropdown-item @click="openImageWindow">画像</b-dropdown-item>
-            <b-dropdown-item disabled>動画</b-dropdown-item>
-            <b-dropdown-item disabled>音源</b-dropdown-item>
+            <b-dropdown-item @click="openImageWindow">
+              画像
+            </b-dropdown-item>
+            <b-dropdown-item disabled>
+              動画
+            </b-dropdown-item>
+            <b-dropdown-item disabled>
+              音源
+            </b-dropdown-item>
           </b-nav-item-dropdown>
         </b-navbar-nav>
       </b-collapse>
@@ -25,11 +31,23 @@
       :selection-mode="true"
       :selected-callback="imageSelectCallback"
     />
-    <characters />
-    <trpgmap />
+    <characters
+      v-if="enterdRoom"
+    />
+    <trpgmap
+      v-if="enterdRoom"
+    />
     <chatbox
+      v-if="enterdRoom"
       ref="chatbox"
     />
+    <b-modal
+      ref='mainError'
+      ok-only
+      @ok="returnMainPage"
+    >
+    {{ errorMessage }}
+    </b-modal>
   </div>
 </template>
 
@@ -53,7 +71,9 @@ export default {
     return {
       socket: {},
       roomNo: null,
-      roomData: null
+      roomData: null,
+      enterdRoom: false,
+      errorMessage: '不明なエラーです'
     }
   },
   computed: {
@@ -67,30 +87,42 @@ export default {
   beforeMount () {
     const _this = this
     this.roomNo = this.$route.params.id
+    const password = this.$route.query.password || ''
     this.$store.commit('setSocket', { name: 'room' })
-    this.socketRoom.on('roomData', (data) => {
-      _this.setRoomData(data)
-      _this.$refs.chatbox.selectedSystem = _this.roomData.system
+    this.socketRoom.on('enterRoom.success', () => {
+      console.log('enterRoom.success')
+      _this.enterdRoom = true
+      _this.socketRoom.on('roomData', (data) => {
+        console.log('setRoomData')
+        _this.setRoomData(data)
+      })
+      _this.socketRoom.emit('roomData', _this.roomNo)
+
+      _this.socketRoom.on('images', (images) => {
+        _this.$store.commit('setImages', { images })
+      })
+      _this.socketRoom.emit('images')
+      _this.socketRoom.on('images.add', (image) => {
+        _this.$store.commit('addImage', { image })
+      })
+      _this.socketRoom.on('images.delete', (id) => {
+        _this.$store.commit('deleteImage', { id })
+      })
     })
-    this.socketRoom.emit('roomData', this.roomNo)
-    this.socketRoom.emit('enterRoom', this.roomNo, 'plh')
-    this.socketRoom.on('images', (images) => {
-      _this.$store.commit('setImages', { images })
+    this.socketRoom.on('enterRoom.failed', ({ msg }) => {
+      console.log('enterRoom.failed')
+      this.errorMessage = msg
+      this.$refs.mainError.show()
     })
-    this.socketRoom.emit('images')
-    this.socketRoom.on('images.add', (image) => {
-      _this.$store.commit('addImage', { image })
-    })
-    this.socketRoom.on('images.delete', (id) => {
-      _this.$store.commit('deleteImage', { id })
-    })
+    this.socketRoom.emit('enterRoom', { tryRoomNo: this.roomNo, name: 'plh', password })
   },
   mounted () {
   },
   methods: {
     setRoomData (data) {
       this.roomData = data
-      this.$store.commit('setMap', data.map)
+      this.$store.commit('setRoom', { data })
+      this.$store.commit('setMap', { map: data.map })
       delete this.roomData.map
     },
     imageSelectCallback (i) {
@@ -98,6 +130,9 @@ export default {
     },
     openImageWindow () {
       this.$refs.mainImageWindow.show()
+    },
+    returnMainPage () {
+      this.$router.push('/')
     }
   }
 }

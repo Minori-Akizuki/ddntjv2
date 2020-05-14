@@ -2,6 +2,7 @@ import Vue from 'vue'
 import io from 'socket.io-client'
 export const strict = false
 export const state = () => ({
+  room: {},
   sockets: {},
   systems: [],
   chits: [],
@@ -36,6 +37,9 @@ export const mutations = {
   },
   deleteImage (state, { id }) {
     state.images.splice(state.images.findIndex(i => i.id === id), 1)
+  },
+  setRoom (state, { data }) {
+    state.room = data
   },
   setMap (state, { map }) {
     state.map = map

@@ -193,16 +193,26 @@ async function start () {
 
     consola.info(`user ${id} connected`)
 
-    socket.on('enterRoom', (_roomNo, name) => {
-      consola.info(`${id} enter room ${_roomNo}`)
+    socket.on('enterRoom', ({ tryRoomNo, name, password }) => {
+      consola.info(`${id} enter room`)
+      consola.info(tryRoomNo)
       if (roomNo) {
         leaveRoom(roomNo, id)
       }
-      roomNo = _roomNo
+      if (!rooms[tryRoomNo]) {
+        io.to(id).emit('enterRoom.failed', { msg: '不正な部屋番号です' })
+        return
+      }
+      if (sha.sha256(password) !== rooms[tryRoomNo].roomData.password.value) {
+        io.to(id).emit('enterRoom.failed', { msg: 'パスワードが一致していません' })
+        return
+      }
+      roomNo = tryRoomNo
       socket.join(roomNo, () => {
         consola.info(socket.rooms)
         rooms[roomNo].member.push({ id, name })
       })
+      io.to(id).emit('enterRoom.success')
     })
 
     socket.on('disconnected', () => {
