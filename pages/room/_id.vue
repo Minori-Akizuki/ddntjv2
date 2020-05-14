@@ -52,6 +52,7 @@
 </template>
 
 <script>
+import _ from 'lodash'
 import chatbox from '~/components/chatbox.vue'
 import trpgmap from '~/components/map.vue'
 import imagelist from '~/components/imageList.vue'
@@ -117,6 +118,10 @@ export default {
     this.socketRoom.emit('enterRoom', { tryRoomNo: this.roomNo, name: 'plh', password })
   },
   mounted () {
+    // URLコピペのために名前部分を削除
+    const splitUrl = location.href.split('?')
+    const passwordQ = _.reject(splitUrl[1].split('&'), s => s.startsWith('name')).join('&')
+    history.replaceState('', '', `${this.roomNo}?${passwordQ}`)
   },
   methods: {
     setRoomData (data) {
@@ -124,6 +129,7 @@ export default {
       this.$store.commit('setRoom', { data })
       this.$store.commit('setMap', { map: data.map })
       delete this.roomData.map
+      this.$refs.chatbox.selectedSystem = this.$store.getters.room.system
     },
     imageSelectCallback (i) {
       console.log(i)

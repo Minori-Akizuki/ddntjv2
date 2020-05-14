@@ -97,6 +97,7 @@ export default {
       console.log('chat recieve')
       _this.addMessage(msg)
     })
+    this.name = this.$route.query.name
   },
   methods: {
     addMessage (msg) {

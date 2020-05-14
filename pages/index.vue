@@ -26,6 +26,19 @@
         />
         <b-row>
           <b-col cols="5">
+            名前
+          </b-col>
+          <b-col cols="7">
+            <b-form-input
+              id="name"
+              v-model="userName"
+              type="text"
+              size="sm"
+            />
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col cols="5">
             パスワード(あれば)
           </b-col>
           <b-col cols="7">
@@ -63,6 +76,17 @@
         <b-col sm="9">
           <b-form-input
             v-model="newRoomName"
+            type="text"
+          />
+        </b-col>
+      </b-row>
+      <b-row>
+        <b-col sm="3">
+          名前
+        </b-col>
+        <b-col sm="9">
+          <b-form-input
+            v-model="userName"
             type="text"
           />
         </b-col>
@@ -112,6 +136,7 @@ export default {
       rooms: [],
       selectedSystem: null,
       roomName: '',
+      userName: '',
       password: '',
       showPasswordError: false,
       newRoomPassword: '',
@@ -158,7 +183,7 @@ export default {
     this.socket.emit('roomsinfo')
     this.socket.on('createRoom.success', () => {
       console.log('roomCreated')
-      _this.$router.push(`/room/${_this.selectedRoom}?password=${_this.newRoomPassword}`)
+      _this.$router.push(`/room/${_this.selectedRoom}?password=${_this.newRoomPassword}&name=${_this.userName}`)
     })
     this.socket.on('createRoom.error', (err) => {
       console.log('error in create room')
@@ -177,7 +202,7 @@ export default {
         return
       }
       if (room.isCreated && this.checkPassword) {
-        this.$router.push(`/room/${this.selectedRoom}?password=${this.password}`)
+        this.$router.push(`/room/${this.selectedRoom}?password=${this.password}&name=${this.userName}`)
       }
     },
     createRoom () {

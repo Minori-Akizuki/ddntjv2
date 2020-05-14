@@ -215,7 +215,7 @@ async function start () {
       io.to(id).emit('enterRoom.success')
     })
 
-    socket.on('disconnected', () => {
+    socket.on('disconnect', () => {
       consola.info(`user ${id} disconnected`)
       if (roomNo) {
         leaveRoom(roomNo, id)

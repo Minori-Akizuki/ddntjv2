@@ -106,5 +106,8 @@ export const getters = {
         text: s.name
       }
     })
+  },
+  room (state) {
+    return state.room
   }
 }
