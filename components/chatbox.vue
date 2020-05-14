@@ -2,13 +2,13 @@
   <no-ssr placeholder="Loading...">
     <vue-resizable
       id="chatbox"
-      dragSelector=".draggable"
+      dragSelector=".draggable_vue"
       left="0"
       top="50vh"
       width="90vw"
       :active="['rb','r','b']"
     >
-      <div class="draggable" />
+      <div class="draggable_vue" />
       <div id="chatmessages" @scroll="manageAutoScrollFlag()">
         <pre
           v-for="message in messages"
@@ -145,7 +145,7 @@ export default {
   z-index: 3;
 }
 
-.draggable{
+.draggable_vue{
   height: 10px;
   width: 100%;
   background-color: #808080;

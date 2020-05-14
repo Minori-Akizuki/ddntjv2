@@ -199,10 +199,6 @@ export default {
   watch: {
   },
   beforeMount () {
-  },
-  created () {
-  },
-  mounted () {
     const _this = this
     this.socketRoom.on('status.change', function (status) {
       console.log(`status changed from other player ${status}`)
@@ -234,6 +230,10 @@ export default {
     this.socketRoom.emit('chits.init')
     this.newChit = this.copyNewChit({})
   },
+  created () {
+  },
+  mounted () {
+  },
   methods: {
     buffaChitsData () {
       console.log('buffaChitsData')
@@ -243,9 +243,7 @@ export default {
      * b-table で扱いやすいようにデータを成型
      */
     chitsData () {
-      console.log('chitsData -----')
       const datas = _.map(this.chits, (c) => {
-        console.log(c)
         const tmp = {
           name: c.name,
           initiative: c.initiative,
