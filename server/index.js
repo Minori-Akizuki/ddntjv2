@@ -341,6 +341,40 @@ async function start () {
       const status = rooms[roomNo].roomData.status.value
       io.to(id).emit('status.init', status)
     })
+    socket.on('status.edit', async (statusStr) => {
+      const makeStatusData = function (status) {
+        const statusArr = status.split(' ')
+        const statusData = statusArr.map((name) => {
+          if (name.charAt(0) === '*') {
+            return {
+              name: name.slice(1),
+              type: 'bool',
+              value: false
+            }
+          } else {
+            return {
+              name,
+              type: 'number',
+              value: 0
+            }
+          }
+        })
+        return statusData
+      }
+      const room = rooms[roomNo]
+      const dbRoom = room.roomDb
+      room.roomData.chits.value = room.roomData.chits.value.map((c) => {
+        c.status = makeStatusData(statusStr)
+        return c
+      })
+      room.roomData.status.value = statusStr
+      await dbRoom.insert(room.roomData.status, IDs.status)
+      await dbRoom.insert(room.roomData.chits, IDs.chits)
+      room.roomData.status = await dbRoom.get(IDs.status)
+      room.roomData.chits = await dbRoom.get(IDs.chits)
+      io.to(roomNo + '').emit('status.init', statusStr)
+      io.to(roomNo + '').emit('chits.init', room.roomData.chits.value)
+    })
     socket.on('chits.init', () => {
       const chits = rooms[roomNo].roomData.chits.value
       io.to(id).emit('chits.init', chits)

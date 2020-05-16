@@ -32,7 +32,7 @@
           :target="'chit_'+chit.id"
           triggers="hover"
         >
-          <pre>{{ chit.memo }}</pre>
+          {{ chit.memo }}
         </b-tooltip>
       </div>
     </div>
@@ -141,7 +141,7 @@ export default {
         )
       }
       const _this = this
-      window.$('.draggable').draggable()
+      window.$('.draggable-map').draggable()
       const option = this.map.snapping ? { grid: [50, 50] } : { grid: [1, 1] }
       window.$('.draggable-chit')
         .draggable(option)
@@ -180,6 +180,10 @@ export default {
   width: 50px;
   object-fit: contain;
   font-size: 9pt;
+}
+
+.memo{
+  color: white;
 }
 
 vue-resizavle[id^=chit]{

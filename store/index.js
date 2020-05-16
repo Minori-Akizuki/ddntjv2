@@ -68,7 +68,7 @@ export const mutations = {
     if (index === -1) {
       throw new Error('chit not found')
     }
-    state.chits[index] = chit
+    state.chits.splice(index, 1, chit)
   }
 }
 

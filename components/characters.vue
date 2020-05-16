@@ -72,12 +72,35 @@
           </b-modal>
         </template>
       </b-table>
-      <b-button
-        v-b-modal.addChar
-        size="sm"
+      <b-row>
+        <b-col>
+          <b-button
+            v-b-modal.statEdit
+            size="sm"
+          >
+            ステータス項目編集
+          </b-button>
+        </b-col>
+        <b-col>
+          <b-button
+            v-b-modal.addChar
+            size="sm"
+          >
+            キャラ追加
+          </b-button>
+        </b-col>
+      </b-row>
+      <b-modal
+        id="statEdit"
+        title="ステータス項目編集"
+        @ok="sendStatus"
       >
-        キャラ追加
-      </b-button>
+        スペース区切りでステータス項目を編集してください。<br>
+        (頭に*をつけるとチェックボックスになります。)
+        <b-form-input
+          v-model="statusStrBuf"
+        />
+      </b-modal>
       <b-modal
         id="addChar"
         size="xl"
@@ -166,6 +189,7 @@ export default {
         { name: 'poizon', type: 'bool', value: false }
       ],
       statusStr: 'HP MP *poizon',
+      statusStrBuf: '',
       newChit: {},
       decidedImageCallback: null,
       chitsDataBuf: []
@@ -302,17 +326,10 @@ export default {
       this.socketRoom.emit('chit.delete', id)
     },
     /**
-     * 自分でステータスを更新してそれをソケットに通知する
+     * ステータス更新の通知
      */
-    setStatusOwn () {
-      this.setStatus()
-      this.socketio.emit('publish.statusChanged', this.statusStr)
-    },
-    /**
-     * 他プレイヤーがステータス項目を更新した時
-     */
-    setStatusOther (status) {
-      this.setStatus(status)
+    sendStatus () {
+      this.socketRoom.emit('status.edit', this.statusStrBuf)
     },
     /**
      * ステータス項目を更新する
@@ -320,6 +337,7 @@ export default {
     setStatus (status) {
       if (status) {
         this.statusStr = status
+        this.statusStrBuf = status
       }
       const statusArr = this.statusStr.split(' ')
       // ステータス基本情報の生成
@@ -451,5 +469,9 @@ img{
     height: 50px;
     width: 50px;
     object-fit: contain;
+}
+
+td th{
+  padding: 0px !important;
 }
 </style>

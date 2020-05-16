@@ -104,6 +104,14 @@ export default {
       return _.map(this.$store.getters.chits, 'name')
     }
   },
+  watch: {
+    inputColor () {
+      window.localStorage.setItem('inputColor', this.inputColor)
+    },
+    name () {
+      window.localStorage.setItem('name', this.name)
+    }
+  },
   mounted () {
     const _this = this
     this.socketRoom.on('chat.init', function (logs) {
@@ -114,7 +122,8 @@ export default {
       _this.addMessage(msg)
     })
     this.selectedSystem = this.$store.getters.room.system
-    this.name = this.$route.query.name
+    this.name = window.localStorage.getItem('name') || this.$route.query.name || ''
+    this.inputColor = window.localStorage.getItem('inputColor') || '#000000'
   },
   methods: {
     addMessage (msg) {
