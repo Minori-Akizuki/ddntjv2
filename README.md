@@ -36,7 +36,7 @@ $ npm run start
 $ npm run generate
 ```
 
-Heroku……?使った事ありませんね……だれかプルリク送って……
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
 ## Author
 
