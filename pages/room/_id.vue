@@ -147,6 +147,9 @@ export default {
       _this.socketRoom.on('room.delete', () => {
         _this.$router.push('/')
       })
+      _this.socketRoom.on('reconnect', () => {
+        _this.socketRoom.emit('enterRoom', { tryRoomNo: this.roomNo, name: this.$route.query.name, password })
+      })
     })
     this.socketRoom.on('enterRoom.failed', ({ msg }) => {
       this.errorMessage = msg

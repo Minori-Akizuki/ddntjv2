@@ -122,7 +122,7 @@ export default {
       _this.addMessage(msg)
     })
     this.selectedSystem = this.$store.getters.room.system
-    this.name = window.localStorage.getItem('name') || this.$route.query.name || ''
+    this.name = this.$route.query.name || window.localStorage.getItem('name') || ''
     this.inputColor = window.localStorage.getItem('inputColor') || '#000000'
   },
   methods: {
