@@ -69,7 +69,7 @@ function initDb () {
         await roomDb.insert({ value: initdata.room.chatLog }, IDs.chatLog)
         await roomDb.insert({ value: initdata.room.chits }, IDs.chits)
         await roomDb.insert({ value: initdata.room.status }, IDs.status)
-        await roomDb.insert(initdata.room.map, IDs.map)
+        await roomDb.insert({ value: initdata.room.map }, IDs.map)
       } else {
         roomDb = await nano.db.use(roomDbName)
       }
@@ -147,7 +147,7 @@ function moldRoomData (roomRaw) {
   room.system = roomRaw.roomData.system.value
   room.chatLog = roomRaw.roomData.chatLog.value
   room.chits = roomRaw.roomData.chits.value
-  room.map = roomRaw.roomData.map // こいつだけ _id, _rev が残ってるけどまあいいか
+  room.map = roomRaw.roomData.map.value
 
   return room
 }
@@ -341,7 +341,14 @@ async function start () {
       await dbRoom.insert(chits, IDs.chits)
       rooms[roomNo].roomData.chits = await dbRoom.get(IDs.chits)
       io.to(roomNo + '').emit('chit.delete', id)
-
+    })
+    socket.on('map.change', async ({ map }) => {
+      consola.info('---map.change')
+      const dbRoom = rooms[roomNo].roomDb
+      rooms[roomNo].roomData.map.value = map
+      await dbRoom.insert(rooms[roomNo].roomData.map, IDs.map)
+      rooms[roomNo].roomData.map = await dbRoom.get(IDs.map)
+      io.to(roomNo + '').emit('map.change', { map: rooms[roomNo].roomData.map.value })
     })
   })
 }

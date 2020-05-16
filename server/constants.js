@@ -23,7 +23,7 @@ exports.constants = () => {
           width: 10,
           type: 'color',
           color: '#888888',
-          image: { bin: '' },
+          image: 0,
           snapping: false
         }
       }

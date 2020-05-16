@@ -5,10 +5,15 @@
     :style="mapStyle"
   >
     <div
-      id="map-background"
+      id="map-background-color"
       class="draggable-map"
-      :style="mapStyle"
+      :style="mapColorStyle"
     >
+      <img
+        v-if="map.type==='image'"
+        :style="mapImageStyle"
+        :src="mapImageBin"
+      >
       <!-- チット -->
       <div
         v-for="chit in chitsBuf"
@@ -67,6 +72,22 @@ export default {
         height: this.map.height * 50 + 'px',
         width: this.map.width * 50 + 'px'
       }
+    },
+    mapColorStyle () {
+      return {
+        height: this.map.height * 50 + 'px',
+        width: this.map.width * 50 + 'px',
+        'background-color': this.map.color
+      }
+    },
+    mapImageStyle () {
+      return {
+        height: this.map.height * 50 + 'px',
+        width: this.map.width * 50 + 'px'
+      }
+    },
+    mapImageBin () {
+      return this.$store.getters.imageById(this.map.img).bin
     }
   },
   watch: {
@@ -79,11 +100,20 @@ export default {
 
   },
   mounted () {
+    const _this = this
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'updateChit') {
         console.log('catch chit change')
-        this.buffaChits()
+        _this.buffaChits()
+        return
       }
+      if (mutation.type === 'setMap') {
+        console.log('catch map change')
+        // _this.setmap()
+      }
+    })
+    this.socketRoom.on('map.change', ({ map }) => {
+      _this.$store.commit('setMap', { map })
     })
   },
   methods: {
@@ -151,7 +181,7 @@ export default {
   position: absolute;
 }
 
-#map-background {
+#map-background-color {
   background-color: lightgray;
 }
 
@@ -159,6 +189,7 @@ export default {
   border-width: 1px;
   height: 50px;
   width: 50px;
+  object-fit: contain;
 }
 
 vue-resizavle[id^=chit]{

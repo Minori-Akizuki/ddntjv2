@@ -97,6 +97,7 @@ export default {
       console.log('chat recieve')
       _this.addMessage(msg)
     })
+    this.selectedSystem = this.$store.getters.room.system
     this.name = this.$route.query.name
   },
   methods: {

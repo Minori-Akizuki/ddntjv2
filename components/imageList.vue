@@ -176,5 +176,6 @@ export default {
 img.preview-item-file{
     height: 50px;
     width: 50px;
+    object-fit: contain;
 }
 </style>

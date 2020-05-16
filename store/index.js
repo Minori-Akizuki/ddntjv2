@@ -94,7 +94,7 @@ export const getters = {
     return state.images
   },
   imageById: state => (id) => {
-    return state.images[state.images.findIndex(i => i.id === id)]
+    return state.images[state.images.findIndex(i => i.id === id)] || { id: 0, bin: '' }
   },
   systems (state) {
     return state.systems
