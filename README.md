@@ -12,7 +12,7 @@ Google Chrome
 ### Require
 
 * Node.js (作者環境は 12.6.2)
-* CouchDB
+* CouchDB (初期データは勝手につくられます)
 * BCDice (どこかにあればいい)
 
 ### Setup
