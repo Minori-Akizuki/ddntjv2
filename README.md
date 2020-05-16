@@ -3,6 +3,10 @@
 よみかたは「どどんてぃ」。
 オンラインでTRPGができるよ。よ。
 
+## sample
+
+http://tk2-263-41290.vs.sakura.ne.jp:3000
+
 ## Recommended environment
 
 Google Chrome
