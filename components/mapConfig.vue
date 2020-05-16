@@ -9,7 +9,7 @@
       :selection-mode="true"
       :selected-callback="imageSelectCallback"
     />
-    <b-form-group label='背景種別'>
+    <b-form-group label="背景種別">
       <b-form-radio
         v-model="mapdataBuf.type"
         name="map-type"
@@ -121,7 +121,6 @@ export default {
     const _this = this
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'setMap') {
-        console.log('catch map change')
         _this.mapdataBuf = _.cloneDeep(this.$store.getters.map)
         if (_this.mapdataBuf.img && _this.mapdataBuf.img.id) {
           const img = this.$store.getters.imageById(_this.mapdataBuf.img)
@@ -147,11 +146,9 @@ export default {
       this.appear = false
     },
     openImageWindow () {
-      console.log('open')
       this.$refs.mapImageWindow.show()
     },
     imageSelectCallback (img) {
-      console.log('mapConfig.imageCallback')
       this.mapdataBuf.img = img.id
       this.mapImage = this.$store.getters.imageById(img.id).bin
     },

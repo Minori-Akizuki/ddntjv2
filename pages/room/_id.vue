@@ -126,10 +126,8 @@ export default {
     const password = this.$route.query.password || ''
     this.$store.commit('setSocket', { name: 'room' })
     this.socketRoom.on('enterRoom.success', () => {
-      console.log('enterRoom.success')
       _this.enterdRoom = true
       _this.socketRoom.on('roomData', (data) => {
-        console.log('setRoomData')
         _this.setRoomData(data)
         _this.roomDataReady = true
       })
@@ -151,7 +149,6 @@ export default {
       })
     })
     this.socketRoom.on('enterRoom.failed', ({ msg }) => {
-      console.log('enterRoom.failed')
       this.errorMessage = msg
       this.$refs.mainError.show()
     })
@@ -171,7 +168,6 @@ export default {
       delete this.roomData.map
     },
     imageSelectCallback (i) {
-      console.log(i)
     },
     openImageWindow () {
       this.$refs.mainImageWindow.show()

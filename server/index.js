@@ -134,7 +134,6 @@ function initDb () {
         message: `found DB ${constants.DB_PREFIX}`,
         badge: true
       })
-      consola.info(data)
       dbMaster = nano.db.use(constants.DB_PREFIX)
       images = await dbMaster.get(IDs.images)
       setRoomsAll(rooms, false)
@@ -224,7 +223,6 @@ async function start () {
       }
       roomNo = tryRoomNo
       socket.join(roomNo, () => {
-        consola.info(socket.rooms)
         rooms[roomNo].member.push({ id, name })
       })
       io.to(id).emit('enterRoom.success')
@@ -242,9 +240,6 @@ async function start () {
       io.to(id).emit('chat.init', log)
     })
     socket.on('chat.send', async ({ msg, system }) => {
-      consola.info('chat receive')
-      consola.info(msg)
-      consola.info(system)
       const room = rooms[roomNo]
       const roomDb = room.roomDb
       room.roomData.chatLog.value.push(msg)
@@ -252,8 +247,6 @@ async function start () {
       room.roomData.chatLog = await roomDb.get(IDs.chatLog)
       io.to(roomNo + '').emit('chat.receive', msg)
       dicebot.roll(async (err, res) => {
-        consola.info(err)
-        consola.info(res)
         if (err || !res.ok) {
           return
         }

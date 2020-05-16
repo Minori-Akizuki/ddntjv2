@@ -111,7 +111,6 @@ export default {
     })
     this.socketRoom.emit('chat.init')
     this.socketRoom.on('chat.receive', function (msg) {
-      console.log('chat recieve')
       _this.addMessage(msg)
     })
     this.selectedSystem = this.$store.getters.room.system
@@ -119,7 +118,6 @@ export default {
   },
   methods: {
     addMessage (msg) {
-      console.log('add msg')
       this.messages.push(msg)
       if (this.autoScroll) {
         this.$nextTick(() => {

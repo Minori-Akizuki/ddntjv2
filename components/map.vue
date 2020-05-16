@@ -92,7 +92,6 @@ export default {
   },
   watch: {
     chits () {
-      console.log('catch chit change')
       this.buffaChits()
     }
   },
@@ -103,12 +102,10 @@ export default {
     const _this = this
     this.$store.subscribe((mutation, state) => {
       if (mutation.type === 'updateChit') {
-        console.log('catch chit change')
         _this.buffaChits()
         return
       }
       if (mutation.type === 'setMap') {
-        console.log('catch map change')
         // _this.setmap()
       }
     })
@@ -119,8 +116,6 @@ export default {
   methods: {
     buffaChits () {
       const _this = this
-      console.log('-- trpgmap.buffaChits')
-      console.log(this.chits)
       this.chitsBuf = _.cloneDeep(this.chits)
       this.$nextTick(() => {
         _this.reAttachDraggable()
@@ -137,7 +132,6 @@ export default {
       return img.bin
     },
     reAttachDraggable () {
-      console.log('reattach draggable')
       if (this.map.snapping) {
         this.chits.map(
           (c) => {
@@ -155,8 +149,6 @@ export default {
         .on(
           'dragstop',
           function (event, ui) {
-            console.log('------ dragged chit')
-            console.log(ui)
             const chit = _this.convertUitoChit(ui)
             _this.socketRoom.emit('chit.update', chit)
           }
@@ -164,12 +156,9 @@ export default {
     },
     convertUitoChit (ui) {
       const _helper = ui.helper
-      console.log(_helper[0].id, ui.position.left, ui.position.top)
       const id = _helper[0].id.slice(5)
-      console.log(`taeget is <${this.chits.find((_chit) => { return _chit.id === id })}>`)
       const chit = this.chitsBuf.find((_chit) => { return _chit.id === id })
       chit.position = new Vector2d(ui.position.left, ui.position.top)
-      console.log('conv chit [' + this.chits.findIndex((_chit) => { return _chit.id === id }) + '] to : ' + chit.toString())
       return chit
     }
   }

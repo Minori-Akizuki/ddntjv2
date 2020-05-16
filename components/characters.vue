@@ -201,21 +201,17 @@ export default {
   beforeMount () {
     const _this = this
     this.socketRoom.on('status.change', function (status) {
-      console.log(`status changed from other player ${status}`)
       _this.setStatus(status)
     })
     this.socketRoom.on('status.init', (status) => {
-      console.log(`status init ${status}`)
       _this.setStatus(status)
     })
     this.socketRoom.emit('status.init')
     this.socketRoom.on('chits.init', (chits) => {
-      console.log(`chits init ${chits}`)
       this.$store.commit('setChits', { chits })
       this.buffaChitsData()
     })
     this.socketRoom.on('chit.add', (chit) => {
-      console.log('chit add')
       this.$store.commit('addChit', { chit })
       this.buffaChitsData()
     })
@@ -236,7 +232,6 @@ export default {
   },
   methods: {
     buffaChitsData () {
-      console.log('buffaChitsData')
       this.chitsDataBuf = _.cloneDeep(this.chitsData())
     },
     /**
@@ -276,19 +271,16 @@ export default {
       chit.toString = function () {
         return `chit : ${this.id},${this.name},${this.position.x},${this.position.y}`
       }
-      console.log('create chit ' + chit.toString())
       return chit
     },
     /**
      * 新規チットの追加をソケットへ通知
      */
     addNewChit () {
-      console.log('addNewChit')
       const chit = this.copyNewChit(this.newChit)
       this.socketRoom.emit('chit.add', chit)
     },
     updateChit ({ event, field, value, id }) {
-      console.log('update.chit')
       const rawChit = _.find(this.chits, { id })
       if (field === 'initiative' ||
         field === 'id' ||
@@ -307,7 +299,6 @@ export default {
      * チットの削除とソケットへの通知
      */
     deleteChit (id) {
-      console.log(`delete chit ${id}`)
       this.socketRoom.emit('chit.delete', id)
     },
     /**
@@ -330,7 +321,6 @@ export default {
       if (status) {
         this.statusStr = status
       }
-      console.log(`set status ${this.statusStr}`)
       const statusArr = this.statusStr.split(' ')
       // ステータス基本情報の生成
       const newStatus = statusArr.map(
@@ -384,10 +374,8 @@ export default {
     openImageList (chit) {
       const _this = this
       this.decidedImageCallback = function (image) {
-        console.log('--- decidedImageCallback')
         chit.img = image.id
         _this.updateChit({ value: chit.img, field: 'img', id: chit.id })
-        console.log(chit)
       }
       this.$refs.chitImagelist.show()
     },
@@ -396,24 +384,18 @@ export default {
      */
     openImageListNew (chit) {
       this.decidedImageCallback = function (image) {
-        console.log('--- decidedImageCallback(new)')
         chit.img = image.id
-        console.log(chit)
       }
-      console.log(this.$refs.newimg)
       this.$refs.chitImagelist.show()
     },
     /**
      * チットに対応する画像の検索
      */
     imgFromChit (chit) {
-      console.log('--- imgFromChit')
-      console.log(chit)
       if (!chit) { return '' }
       const img = chit.img
         ? this.$store.getters.imageById(chit.img)
         : { img: '' }
-      console.log(img)
       // TODO : このreturnを遅延させる必要がある
       return img.bin
     },
@@ -421,7 +403,6 @@ export default {
      * チット編集画面を開く
      */
     openChitEdit (id) {
-      console.log(id)
       this.$refs['edit_' + id].show()
     }
   }

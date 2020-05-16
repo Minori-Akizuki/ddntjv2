@@ -182,11 +182,9 @@ export default {
     })
     this.socket.emit('roomsinfo')
     this.socket.on('createRoom.success', () => {
-      console.log('roomCreated')
       _this.$router.push(`/room/${_this.selectedRoom}?password=${_this.newRoomPassword}&name=${_this.userName}`)
     })
     this.socket.on('createRoom.error', (err) => {
-      console.log('error in create room')
       _this.error = err
       _this.$refs.error.show()
     })

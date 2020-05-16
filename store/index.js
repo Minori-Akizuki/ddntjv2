@@ -48,7 +48,6 @@ export const mutations = {
     state.chits = chits
   },
   addChit (state, { chit }) {
-    console.log('state.addChit', chit.toString())
     if (state.chits.findIndex(c => c.id === chit.id) !== -1) {
       throw new Error('duplicate chit id')
     }
