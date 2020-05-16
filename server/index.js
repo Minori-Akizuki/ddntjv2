@@ -42,65 +42,76 @@ let dbMaster
 const rooms = []
 let images = {}
 
+/**
+ * _rooms に各部屋の情報のセットアップをする
+ * @param {Array} _rooms 部屋の配列
+ * @param {Boolean} reCreate 初期化フラグ
+ * @param {Number} i 部屋番号
+ */
+const setRoom = async function (_rooms, reCreate, i) {
+  const roomDbName = constants.DB_PREFIX + '_room_' + i
+  let roomDb
+  if (reCreate) {
+    // init room DB
+    consola.info(`create ${roomDbName}`)
+    await nano.db.destroy(roomDbName).catch(() => {})
+    await nano.db.create(roomDbName)
+    roomDb = await nano.db.use(roomDbName)
+    const initdata = constantsF().INITDATA
+    // TODO : 配列にぶちこんで全部並列に実行する
+    await roomDb.insert({ value: initdata.room.isCreated }, IDs.isCreated)
+    await roomDb.insert({ value: i }, IDs.roomNo)
+    await roomDb.insert({ value: initdata.room.roomName }, IDs.roomName)
+    await roomDb.insert({ value: initdata.room.password }, IDs.password)
+    await roomDb.insert({ value: initdata.room.system }, IDs.system)
+    await roomDb.insert({ value: initdata.room.chatLog }, IDs.chatLog)
+    await roomDb.insert({ value: initdata.room.chits }, IDs.chits)
+    await roomDb.insert({ value: initdata.room.status }, IDs.status)
+    await roomDb.insert({ value: initdata.room.map }, IDs.map)
+  } else {
+    roomDb = await nano.db.use(roomDbName)
+  }
+
+  consola.info({
+    message: 'chash room Data',
+    badge: true
+  })
+  const roomData = {}
+  const isCreated = roomDb.get(IDs.isCreated)
+  const roomNo = roomDb.get(IDs.roomNo)
+  const roomName = roomDb.get(IDs.roomName)
+  const password = roomDb.get(IDs.password)
+  const system = roomDb.get(IDs.system)
+  const chatLog = roomDb.get(IDs.chatLog)
+  const chits = roomDb.get(IDs.chits)
+  const status = roomDb.get(IDs.status)
+  const map = roomDb.get(IDs.map)
+
+  roomData.isCreated = await isCreated
+  roomData.roomNo = await roomNo
+  roomData.roomName = await roomName
+  roomData.password = await password
+  roomData.system = await system
+  roomData.chatLog = await chatLog
+  roomData.chits = await chits
+  roomData.status = await status
+  roomData.map = await map
+  rooms[i] = { roomDb, member: [], roomData }
+}
+
+/**
+ * 全ての部屋に対して使用準備をする
+ * @param {any} _rooms
+ * @param {Boolean} reCreate
+ */
+const setRoomsAll = function (_rooms, reCreate) {
+  [...Array(constants.ROOM_TOTAL)].forEach((_, i) => {
+    setRoom(_rooms, reCreate, i)
+  })
+}
+
 // init db
 function initDb () {
-  /**
-   * _rooms に各部屋の情報のセットアップをする
-   * @param {Array} _rooms 部屋の配列
-   * @param {Boolean} reCreate 初期化フラグ
-   */
-  const setRoom = async function (_rooms, reCreate) {
-    for (let i = 0; i < constants.ROOM_TOTAL; i++) {
-      const roomDbName = constants.DB_PREFIX + '_room_' + i
-      let roomDb
-      if (reCreate) {
-        // init room DB
-        consola.info(`create ${roomDbName}`)
-        nano.db.destroy(roomDbName, () => {})
-        await nano.db.create(roomDbName)
-        roomDb = await nano.db.use(roomDbName)
-        const initdata = constantsF().INITDATA
-        // TODO : 配列にぶちこんで全部並列に実行する
-        await roomDb.insert({ value: initdata.room.isCreated }, IDs.isCreated)
-        await roomDb.insert({ value: i }, IDs.roomNo)
-        await roomDb.insert({ value: initdata.room.roomName }, IDs.roomName)
-        await roomDb.insert({ value: initdata.room.password }, IDs.password)
-        await roomDb.insert({ value: initdata.room.system }, IDs.system)
-        await roomDb.insert({ value: initdata.room.chatLog }, IDs.chatLog)
-        await roomDb.insert({ value: initdata.room.chits }, IDs.chits)
-        await roomDb.insert({ value: initdata.room.status }, IDs.status)
-        await roomDb.insert({ value: initdata.room.map }, IDs.map)
-      } else {
-        roomDb = await nano.db.use(roomDbName)
-      }
-
-      consola.info({
-        message: 'chash room Data',
-        badge: true
-      })
-      const roomData = {}
-      const isCreated = roomDb.get(IDs.isCreated)
-      const roomNo = roomDb.get(IDs.roomNo)
-      const roomName = roomDb.get(IDs.roomName)
-      const password = roomDb.get(IDs.password)
-      const system = roomDb.get(IDs.system)
-      const chatLog = roomDb.get(IDs.chatLog)
-      const chits = roomDb.get(IDs.chits)
-      const status = roomDb.get(IDs.status)
-      const map = roomDb.get(IDs.map)
-
-      roomData.isCreated = await isCreated
-      roomData.roomNo = await roomNo
-      roomData.roomName = await roomName
-      roomData.password = await password
-      roomData.system = await system
-      roomData.chatLog = await chatLog
-      roomData.chits = await chits
-      roomData.status = await status
-      roomData.map = await map
-      rooms.push({ roomDb, member: [], roomData })
-    }
-  }
   consola.info('finding DB...')
   nano.db.get(constants.DB_PREFIX, async function (err, data) {
     if (err) {
@@ -116,7 +127,7 @@ function initDb () {
       dbMaster = nano.db.use(constants.DB_PREFIX)
       dbMaster.insert({ value: [] }, IDs.images)
       // rooms
-      setRoom(rooms, true)
+      setRoomsAll(rooms, true)
     } else {
       // マスターDBが見つかった場合は使用準備をする
       consola.info({
@@ -126,7 +137,7 @@ function initDb () {
       consola.info(data)
       dbMaster = nano.db.use(constants.DB_PREFIX)
       images = await dbMaster.get(IDs.images)
-      setRoom(rooms, false)
+      setRoomsAll(rooms, false)
     }
   })
 }
@@ -203,6 +214,10 @@ async function start () {
         io.to(id).emit('enterRoom.failed', { msg: '不正な部屋番号です' })
         return
       }
+      if (!rooms[tryRoomNo].roomData.isCreated.value) {
+        io.to(id).emit('enterRoom.failed', { msg: '部屋が作成されていません' })
+        return
+      }
       if (sha.sha256(password) !== rooms[tryRoomNo].roomData.password.value) {
         io.to(id).emit('enterRoom.failed', { msg: 'パスワードが一致していません' })
         return
@@ -222,9 +237,39 @@ async function start () {
       }
     })
 
-    socket.on('chat.send', (msg) => {
+    socket.on('chat.init', () => {
+      const log = rooms[roomNo].roomData.chatLog.value
+      io.to(id).emit('chat.init', log)
+    })
+    socket.on('chat.send', async ({ msg, system }) => {
       consola.info('chat receive')
+      consola.info(msg)
+      consola.info(system)
+      const room = rooms[roomNo]
+      const roomDb = room.roomDb
+      room.roomData.chatLog.value.push(msg)
+      await roomDb.insert(room.roomData.chatLog, IDs.chatLog)
+      room.roomData.chatLog = await roomDb.get(IDs.chatLog)
       io.to(roomNo + '').emit('chat.receive', msg)
+      dicebot.roll(async (err, res) => {
+        consola.info(err)
+        consola.info(res)
+        if (err || !res.ok) {
+          return
+        }
+        const dmsg = {
+          id: Date.now(),
+          name: system,
+          text: res.result.slice(1),
+          color: msg.color
+        }
+        room.roomData.chatLog.value.push(dmsg)
+        await roomDb.insert(room.roomData.chatLog, IDs.chatLog)
+        room.roomData.chatLog = await roomDb.get(IDs.chatLog)
+        io.to(roomNo + '').emit('chat.receive', dmsg)
+      },
+      system,
+      msg.text)
     })
 
     socket.on('systems', () => {
@@ -349,6 +394,10 @@ async function start () {
       await dbRoom.insert(rooms[roomNo].roomData.map, IDs.map)
       rooms[roomNo].roomData.map = await dbRoom.get(IDs.map)
       io.to(roomNo + '').emit('map.change', { map: rooms[roomNo].roomData.map.value })
+    })
+    socket.on('room.delete', () => {
+      io.to(roomNo + '').emit('room.delete')
+      setRoom(rooms, true, roomNo)
     })
   })
 }

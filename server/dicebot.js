@@ -41,7 +41,7 @@ exports.dicebot = function () {
           })
           res.on('end', (res) => {
             const _res = JSON.parse(body)
-            callback(_res)
+            callback(null, _res)
           })
         }
       )

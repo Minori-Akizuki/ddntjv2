@@ -10,7 +10,7 @@
       </h2>
       <div class="links">
         <a
-          href="https://github.com/nuxt/nuxt.js"
+          href="https://github.com/Minori-Akizuki/ddntjv2"
           target="_blank"
           class="button--grey"
         >

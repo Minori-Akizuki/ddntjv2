@@ -469,5 +469,6 @@ table#list {
 img{
     height: 50px;
     width: 50px;
+    object-fit: contain;
 }
 </style>

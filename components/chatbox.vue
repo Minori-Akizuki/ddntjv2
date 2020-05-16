@@ -2,7 +2,7 @@
   <no-ssr placeholder="Loading...">
     <vue-resizable
       id="chatbox"
-      dragSelector=".draggable_vue"
+      drag-selector=".draggable_vue"
       left="0"
       top="50vh"
       width="90vw"
@@ -14,21 +14,30 @@
           v-for="message in messages"
           v-cloak
           :key="message.id"
-          :style="{color:message.color, height:messageHeight(message.text)}"
+          :style="{color:message.color}"
           class="message"
-        >
-{{ message.text }}
-        </pre>
+        >{{ message.name }} : {{ message.text }}</pre>
       </div>
       <div class="input-settings">
         <b-container fluid>
           <!-- 名前 -->
           <b-row>
             <b-col sm="5">
-              <b-form-input
+              <input
                 v-model="name"
-                size="sm"
-              />
+                type="text"
+                name="name"
+                list="name-list"
+                autocomplete="off"
+              >
+                <datalist id="name-list">
+                  <option
+                    v-for="name in charNameList"
+                    :key="name"
+                    :value="name"
+                  />
+                </datalist>
+              </input>
             </b-col>
             <!-- システム選択 -->
             <b-col sm="5">
@@ -68,6 +77,7 @@
 </template>
 
 <script>
+import _ from 'lodash'
 export default {
   components: {
   },
@@ -89,10 +99,17 @@ export default {
     },
     socketRoom () {
       return this.$store.getters.socket('room')
+    },
+    charNameList () {
+      return _.map(this.$store.getters.chits, 'name')
     }
   },
   mounted () {
     const _this = this
+    this.socketRoom.on('chat.init', function (logs) {
+      _this.messages = logs
+    })
+    this.socketRoom.emit('chat.init')
     this.socketRoom.on('chat.receive', function (msg) {
       console.log('chat recieve')
       _this.addMessage(msg)
@@ -115,9 +132,14 @@ export default {
       if (!event.getModifierState('Control') && !event.getModifierState('Meta')) {
         return
       }
-      const text = `${this.name} : ${this.inputbox.trimEnd()}`
-      const message = { id: Date.now(), color: this.inputColor, text }
-      this.socketRoom.emit('chat.send', message)
+      const text = this.inputbox.trimEnd()
+      const message = {
+        id: Date.now(),
+        color: this.inputColor,
+        name: this.name,
+        text
+      }
+      this.socketRoom.emit('chat.send', { msg: message, system: this.selectedSystem })
       this.inputbox = ''
     },
     manageAutoScrollFlag () {
@@ -150,19 +172,21 @@ export default {
   height: 10px;
   width: 100%;
   background-color: #808080;
+  position: absolute;
 }
 
 #chatmessages{
   background: #fff;
-  height: 5em;
+  height: 100em;
   margin: 5px;
+  margin-top: 18px;
   overflow-y: scroll;
+  overflow-x: scroll;
   position: relative;
   white-space: pre-line;
 }
 
 .message {
-  flex: 0 0 auto;
   font-size: 12px;
   padding: 0;
   margin: 0;

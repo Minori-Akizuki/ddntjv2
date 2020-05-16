@@ -18,6 +18,11 @@
             >
               退室
             </b-dropdown-item>
+            <b-dropdown-item
+              @click="openDeleteWindow"
+            >
+              部屋削除
+            </b-dropdown-item>
           </b-nav-item-dropdown>
         </b-navbar-nav>
         <b-navbar-nav>
@@ -60,6 +65,14 @@
       @ok="returnMainPage"
     >
       {{ errorMessage }}
+    </b-modal>
+    <b-modal
+      ref="deleteRoom"
+      @ok="deleteRoom"
+    >
+      <div class="danger">
+        本当に部屋を削除しますか?
+      </div>
     </b-modal>
   </div>
 </template>
@@ -133,13 +146,16 @@ export default {
       _this.socketRoom.on('images.delete', (id) => {
         _this.$store.commit('deleteImage', { id })
       })
+      _this.socketRoom.on('room.delete', () => {
+        _this.$router.push('/')
+      })
     })
     this.socketRoom.on('enterRoom.failed', ({ msg }) => {
       console.log('enterRoom.failed')
       this.errorMessage = msg
       this.$refs.mainError.show()
     })
-    this.socketRoom.emit('enterRoom', { tryRoomNo: this.roomNo, name: 'plh', password })
+    this.socketRoom.emit('enterRoom', { tryRoomNo: this.roomNo, name: this.$route.query.name, password })
   },
   mounted () {
     // URLコピペのために名前部分を削除
@@ -163,6 +179,12 @@ export default {
     openMapConfig () {
       this.$refs.mapconfig.show()
     },
+    openDeleteWindow () {
+      this.$refs.deleteRoom.show()
+    },
+    deleteRoom () {
+      this.socketRoom.emit('room.delete')
+    },
     returnMainPage () {
       this.$router.push('/')
     }
@@ -171,5 +193,7 @@ export default {
 </script>
 
 <style>
-
+.danger{
+  color: red;
+}
 </style>
