@@ -290,8 +290,6 @@ async function start () {
           password: r.roomData.password.value,
           system: r.roomData.system.value
         }
-        consola.info(r)
-        consola.info(info)
         return info
       }))
     })
@@ -300,7 +298,6 @@ async function start () {
       consola.info(`create room ${roomId}`)
       const roomDb = rooms[roomId].roomDb
       let isCreated = await roomDb.get(IDs.isCreated)
-      consola.info(isCreated)
       if (isCreated.value) {
         consola.error('failed make room')
         io.to(id).emit('createRoom.error', new Error('すでに部屋が作成されています'))
@@ -342,16 +339,13 @@ async function start () {
     socket.on('status.init', () => {
       if (!roomNo) { return }
       const status = rooms[roomNo].roomData.status.value
-      consola.info(`status.init to ${id}`)
       io.to(id).emit('status.init', status)
     })
     socket.on('chits.init', () => {
       const chits = rooms[roomNo].roomData.chits.value
-      consola.info(`chits.init to ${id}`)
       io.to(id).emit('chits.init', chits)
     })
     socket.on('chit.add', async (chit) => {
-      consola.info('----chit.add')
       const chits = rooms[roomNo].roomData.chits
       const dbRoom = rooms[roomNo].roomDb
       chits.value.push(chit)
@@ -360,8 +354,6 @@ async function start () {
       io.to(roomNo + '').emit('chit.add', chit)
     })
     socket.on('chit.update', async (chit) => {
-      consola.info('---chit.update')
-      consola.info(chit)
       const chits = rooms[roomNo].roomData.chits
       const dbRoom = rooms[roomNo].roomDb
       chits.value = _.reject(chits.value, { id: chit.id })
@@ -371,8 +363,6 @@ async function start () {
       io.to(roomNo + '').emit('chit.update', chit)
     })
     socket.on('chit.delete', async (id) => {
-      consola.info('---chit.delete')
-      consola.info(id)
       const chits = rooms[roomNo].roomData.chits
       const dbRoom = rooms[roomNo].roomDb
       chits.value = _.reject(chits.value, { id })
@@ -381,7 +371,6 @@ async function start () {
       io.to(roomNo + '').emit('chit.delete', id)
     })
     socket.on('map.change', async ({ map }) => {
-      consola.info('---map.change')
       const dbRoom = rooms[roomNo].roomDb
       rooms[roomNo].roomData.map.value = map
       await dbRoom.insert(rooms[roomNo].roomData.map, IDs.map)

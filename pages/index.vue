@@ -156,7 +156,7 @@ export default {
       return ret
     },
     enterRoomButtonDisabled () {
-      return !Number.isInteger(this.selectedRoom)
+      return this.selectedRoom === null
     },
     checkPassword () {
       if (this.selectedRoom === null) {
