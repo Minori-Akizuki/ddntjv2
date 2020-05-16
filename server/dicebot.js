@@ -2,6 +2,7 @@ const https = require('http')
 const consola = require('consola')
 const $ = require('jquery')
 
+// BCDiceのURL
 const BOTURL = 'http://localhost:9292/v1/'
 
 exports.dicebot = function () {

@@ -1,10 +1,10 @@
 exports.constants = () => {
   const _constatnts = {
-    DB_HOST: 'localhost',
-    DB_PORT: '5984',
-    DB_USERPASS: 'admin:admin',
-    DB_PREFIX: 'dtj',
-    ROOM_TOTAL: 3,
+    DB_HOST: 'localhost', // CouchDBのホスト
+    DB_PORT: '5984', // CouchDBのポート
+    DB_USERPASS: 'admin:admin', // CouchDBのパスワード
+    DB_PREFIX: 'dtj', // 作成されるDBにつく名前
+    ROOM_TOTAL: 3, // 部屋数上限
     INITDATA: {
       master: {
         mages: []
