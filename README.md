@@ -5,7 +5,7 @@
 
 ## sample
 
-http://tk2-263-41290.vs.sakura.ne.jp:3000
+http://tk2-263-41290.vs.sakura.ne.jp
 
 ## Recommended environment
 
