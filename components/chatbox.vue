@@ -63,6 +63,8 @@
           placeholder="input message here"
           class="input-box"
           @keyup.enter="sendMessage"
+          @keyup.ctrl.up="beforeMessage"
+          @keyup.ctrl.down="afterMessage"
         />
         <b-button
           id="button"
@@ -90,7 +92,8 @@ export default {
       name: 'name',
       inputbox: '',
       inputColor: '#000000',
-      autoScroll: true
+      autoScroll: true,
+      beforeCount: 0
     }
   },
   computed: {
@@ -124,6 +127,7 @@ export default {
     this.selectedSystem = this.$store.getters.room.system
     this.name = this.$route.query.name || window.localStorage.getItem('name') || ''
     this.inputColor = window.localStorage.getItem('inputColor') || '#000000'
+    this.beforeCount = 0
   },
   methods: {
     addMessage (msg) {
@@ -148,6 +152,7 @@ export default {
       }
       this.socketRoom.emit('chat.send', { msg: message, system: this.selectedSystem })
       this.inputbox = ''
+      this.beforeCount = 0
     },
     manageAutoScrollFlag () {
       const messageBox = document.getElementById('chatmessages')
@@ -159,6 +164,25 @@ export default {
     },
     messageHeight (msg) {
       return (msg.split('\n').length) + 'em'
+    },
+    beforeMessage () {
+      const userMessages = this.messages.filter(msg => this.name === msg.name)
+      if (userMessages.length <= this.beforeCount) {
+        return
+      }
+      this.beforeCount++
+      this.inputbox = userMessages[userMessages.length - this.beforeCount].text
+    },
+    afterMessage () {
+      if (this.beforeCount === 1) {
+        return
+      }
+      const userMessages = this.messages.filter(msg => this.name === msg.name)
+      this.beforeCount--
+      if (userMessages.length <= this.beforeCount) {
+        return
+      }
+      this.inputbox = userMessages[userMessages.length - this.beforeCount].text
     }
   }
 }
