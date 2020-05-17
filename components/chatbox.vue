@@ -62,9 +62,12 @@
           size="sm"
           placeholder="input message here"
           class="input-box"
-          @keyup.enter="sendMessage"
+          @keyup.ctrl.enter="sendMessage"
+          @keyup.alt.enter="sendMessage"
           @keyup.ctrl.up="beforeMessage"
+          @keyup.alt.up="beforeMessage"
           @keyup.ctrl.down="afterMessage"
+          @keyup.alt.down="afterMessage"
         />
         <b-button
           id="button"
@@ -105,6 +108,9 @@ export default {
     },
     charNameList () {
       return _.map(this.$store.getters.chits, 'name')
+    },
+    myMaessage () {
+      return this.messages.filter(msg => this.name === msg.name)
     }
   },
   watch: {
@@ -140,9 +146,6 @@ export default {
       }
     },
     sendMessage (event) {
-      if (!event.getModifierState('Control') && !event.getModifierState('Meta')) {
-        return
-      }
       const text = this.inputbox.trimEnd()
       const message = {
         id: Date.now(),
@@ -166,7 +169,7 @@ export default {
       return (msg.split('\n').length) + 'em'
     },
     beforeMessage () {
-      const userMessages = this.messages.filter(msg => this.name === msg.name)
+      const userMessages = this.myMaessage
       if (userMessages.length <= this.beforeCount) {
         return
       }
@@ -177,7 +180,7 @@ export default {
       if (this.beforeCount === 1) {
         return
       }
-      const userMessages = this.messages.filter(msg => this.name === msg.name)
+      const userMessages = this.myMaessage
       this.beforeCount--
       if (userMessages.length <= this.beforeCount) {
         return
