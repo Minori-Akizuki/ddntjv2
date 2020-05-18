@@ -1,0 +1,20 @@
+{
+  "name": "ddntjv2",
+  "description": "Playing online TRPG with HTML5",
+  "keywords": [
+    "HTML5",
+    "Node.js",
+    "TRPG",
+    "nuxt.js"
+  ],
+  "website": "https://github.com/Minori-Akizuki/ddntjv2#readme",
+  "repository": "https://github.com/Minori-Akizuki/ddntjv2",
+  "success_url": "/",
+  "env": {
+    "NODE_ENV": "production",
+    "NPM_CONFIG_PRODUCTION" : "false",
+    "HOST" : "0.0.0.0"
+  },
+  "addons": [
+  ]
+}
