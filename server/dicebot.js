@@ -1,11 +1,8 @@
-const https = require('http')
 const consola = require('consola')
-const $ = require('jquery')
-
-// BCDiceのURL
-const BOTURL = 'http://localhost:9292/v1/'
+const BCDice = require("bcdice");
 
 exports.dicebot = function () {
+  const bcdice = new BCDice.default();
   const _dicebot = {
     /**
      * systemでcommandのダイスを振る。
@@ -19,33 +16,9 @@ exports.dicebot = function () {
         callback(null, { ok: false })
         return
       }
-      const _command = encodeURIComponent(command)
-      const reqUrl = `${BOTURL}diceroll?system=${system}&command=${_command}`
-      consola.debug(`requrl : ${reqUrl}`)
-      const options = {
-        headers: {
-          // todo: ヘッダで強制的にjson返すようにしたい
-        }
-      }
-      https.get(
-        reqUrl,
-        options,
-        (res) => {
-          let body = ''
-          if (res.headers['content-type'] === 'text/html') {
-            callback(new Error('incorrect response'), { ok: false })
-            return
-          }
-          res.setEncoding('utf8')
-          res.on('data', (chunk) => {
-            body += chunk
-          })
-          res.on('end', (res) => {
-            const _res = JSON.parse(body)
-            callback(null, _res)
-          })
-        }
-      )
+      require(`bcdice/lib/diceBot/${system}`)
+      const [result, _] = bcdice.roll(command, system)
+      callback(null, {ok: true, result: result})
     },
 
     /**
@@ -53,26 +26,13 @@ exports.dicebot = function () {
      * @param {DiceCallback} callback
      */
     systems (callback) {
-      const reqUrl = BOTURL + 'names'
-      https.get(
-        reqUrl,
-        {},
-        (res) => {
-          let body = ''
-          if (res.headers['content-type'] === 'text/html') {
-            callback(new Error('incorrect response'), { ok: false })
-            return
-          }
-          res.setEncoding('utf8')
-          res.on('data', (chunk) => {
-            body += chunk
-          })
-          res.on('end', (res) => {
-            const _res = JSON.parse(body)
-            callback(null, _res)
-          })
-        }
-      )
+      const infoList = BCDice.default.infoList.map(info => {
+        let obj = {}
+        obj['system'] = info.gameType
+        obj['name'] = info.gameName
+        return obj
+      })
+      callback(null, {names: infoList})
     },
 
     /**
@@ -81,11 +41,7 @@ exports.dicebot = function () {
      * @param {String} system
      */
     systeminfo (callback, system) {
-      $.getJSON(
-        BOTURL + '/systeminfo?system=' + system
-      ).done(
-        callback
-      )
+      callback(null, BCDice.default.infoList.find(info => info.gameType == system))
     }
     /**
      * @callback DiceCallback
