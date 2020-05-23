@@ -23,7 +23,6 @@ const IDs = {
 // Import and Set Nuxt.js options
 const config = require('../nuxt.config.js')
 config.dev = process.env.NODE_ENV !== 'production'
-process.env.CONSOLA_LEVEL = 6
 
 // 自作ライブラリはnuxtのあとに入れる必要がある。
 // import dicebot
@@ -201,11 +200,7 @@ async function start () {
       roomMember.splice(roomMember.findIndex(m => m.id === id), 1)
     }
 
-    consola.info(`user ${id} connected`)
-
     socket.on('enterRoom', ({ tryRoomNo, name, password }) => {
-      consola.info(`${id} enter room`)
-      consola.info(tryRoomNo)
       if (roomNo) {
         leaveRoom(roomNo, id)
       }
@@ -229,7 +224,6 @@ async function start () {
     })
 
     socket.on('disconnect', () => {
-      consola.info(`user ${id} disconnected`)
       if (roomNo) {
         leaveRoom(roomNo, id)
       }
@@ -271,7 +265,6 @@ async function start () {
       } else {
         dicebot.systems((err, data) => {
           if (err) {
-            consola.err(err)
             return
           }
           systems = data
@@ -281,7 +274,6 @@ async function start () {
     })
 
     socket.on('roomsinfo', () => {
-      consola.info('send info to ' + id)
       io.to(id).emit('roomsinfo', rooms.map((r) => {
         const info = {
           roomNo: r.roomData.roomNo.value,
