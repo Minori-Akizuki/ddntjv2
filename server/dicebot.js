@@ -1,8 +1,7 @@
-const consola = require('consola')
-const BCDice = require("bcdice");
+const BCDice = require('bcdice')
 
 exports.dicebot = function () {
-  const bcdice = new BCDice.default();
+  const bcdice = new BCDice.default()
   const _dicebot = {
     /**
      * systemでcommandのダイスを振る。
@@ -18,7 +17,7 @@ exports.dicebot = function () {
       }
       require(`bcdice/lib/diceBot/${system}`)
       const [result, _] = bcdice.roll(command, system)
-      callback(null, {ok: true, result: result})
+      callback(null, { ok: true, result })
     },
 
     /**
@@ -26,13 +25,13 @@ exports.dicebot = function () {
      * @param {DiceCallback} callback
      */
     systems (callback) {
-      const infoList = BCDice.default.infoList.map(info => {
-        let obj = {}
-        obj['system'] = info.gameType
-        obj['name'] = info.gameName
+      const infoList = BCDice.default.infoList.map((info) => {
+        const obj = {}
+        obj.system = info.gameType
+        obj.name = info.gameName
         return obj
       })
-      callback(null, {names: infoList})
+      callback(null, { names: infoList })
     },
 
     /**
