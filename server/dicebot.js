@@ -1,5 +1,6 @@
 const BCDice = require('bcdice')
 
+// TODO: BCDice-js にしたからコールバックにする必要がなくなった。リファクタリングする。
 exports.dicebot = function () {
   const bcdice = new BCDice.default()
   const _dicebot = {
@@ -17,6 +18,10 @@ exports.dicebot = function () {
       }
       require(`bcdice/lib/diceBot/${system}`)
       const [result, _] = bcdice.roll(command, system)
+      if (result === '') {
+        callback(new Error('cant perse command', { ok: false }))
+        return
+      }
       callback(null, { ok: true, result })
     },
 
@@ -40,7 +45,7 @@ exports.dicebot = function () {
      * @param {String} system
      */
     systeminfo (callback, system) {
-      callback(null, BCDice.default.infoList.find(info => info.gameType == system))
+      callback(null, BCDice.default.infoList.find(info => info.gameType === system))
     }
     /**
      * @callback DiceCallback
