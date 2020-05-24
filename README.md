@@ -17,7 +17,7 @@ Google Chrome
 
 * Node.js (作者環境は 12.6.2)
 * CouchDB (初期データは勝手につくられます)
-* BCDice (どこかにあればいい)
+* ~~BCDice (どこかにあればいい)~~ BCDice-jsに移行したので必要なくなりました。
 
 ### Setup
 
@@ -39,8 +39,6 @@ $ npm run start
 # generate static project
 $ npm run generate
 ```
-
-Heroku……?使った事ありませんね……だれかプルリク送って……
 
 ## Author
 
