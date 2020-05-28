@@ -24,6 +24,7 @@
           <b-row>
             <b-col sm="5">
               <input
+                id="inputbox-name"
                 v-model="name"
                 type="text"
                 name="name"
@@ -39,8 +40,16 @@
                 </datalist>
               </input>
             </b-col>
+            <!-- ログ保存 -->
+            <b-col sm="1">
+              <b-icon-box-arrow-down
+                class="v-center"
+                font-scale="1.5"
+                @click="downloadChatLog"
+              />
+            </b-col>
             <!-- システム選択 -->
-            <b-col sm="5">
+            <b-col sm="4">
               <b-form-select
                 v-model="selectedSystem"
                 :options="systems"
@@ -186,6 +195,14 @@ export default {
         return
       }
       this.inputbox = userMessages[userMessages.length - this.beforeCount].text
+    },
+    downloadChatLog () {
+      const chatText = this.messages.map(m => `${m.name} : ${m.text}`).join('\n')
+      const blob = new Blob([chatText], { type: 'text/plain' })
+      const link = document.createElement('a')
+      link.href = window.URL.createObjectURL(blob)
+      link.download = 'chatLog.txt'
+      link.click()
     }
   }
 }
@@ -200,6 +217,18 @@ export default {
   padding: 0em;
   width: 80vw;
   z-index: 3;
+}
+
+#inputbox-name{
+  width: 100%;
+}
+
+.v-center{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateY(-50%) translateX(-50%);
+  -webkit-transform: translateY(-50%) translateX(-50%);
 }
 
 .draggable_vue{
