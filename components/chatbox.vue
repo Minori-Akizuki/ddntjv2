@@ -25,6 +25,7 @@
             <b-col sm="5">
               <input
                 id="inputbox-name"
+                class="v-center"
                 v-model="name"
                 type="text"
                 name="name"
@@ -220,15 +221,14 @@ export default {
 }
 
 #inputbox-name{
-  width: 100%;
+  width: 90%;
 }
 
 .v-center{
   position: absolute;
   top: 50%;
-  left: 50%;
-  transform: translateY(-50%) translateX(-50%);
-  -webkit-transform: translateY(-50%) translateX(-50%);
+  transform: translateY(-50%);
+  -webkit-transform: translateY(-50%);
 }
 
 .draggable_vue{
